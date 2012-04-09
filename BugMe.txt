@@ -1,0 +1,145 @@
+--------------------------------------------
+fastcgi.lisp のバグについて
+fastcgi.lisp は出力するときに文字数を数えている。
+そのときに最終的い bytes 換算で文字数を数えている。
+clisp では(おそらく)内部的に2byteコードを扱っている。
+euc-jp を使うと漢字コードは文字数そのまま。それが clisp の仕様。
+例えば"りょうす"は clisp としては4文字。
+しかし、fastcgi.lisp はbytes換算で8文字出力をしようとする。
+最終的に C に渡すためバッファを超えて出力をしようとする。
+
+そこで fastcgi.lisp でちゃんと文字数を数えるようにした。
+本当は #+:clisp とかした方がいいかもしれない。
+文字数を変えるときに euc-jp だと思って数えるようにした。
+最初 utf-8 にしたら、文字数がさらに多くなってしまった。
+(不整合が起こった)
+つまり、本当は clisp なら utf-8 か euc-jp かを判断して
+ちゃんとした文字数分創出する必要がある。
+
+いまは clisp という判断もせず、euc-jp であると思って
+出力するようにした。
+
+/usr/port/lisp に 
+sudo make
+で make し、
+そのご、fastcgi.lisp をコピーし
+sudo make install 
+すると full ができる。なぜか /usr/port のばぐっぽく full が
+コピーされないので手動で full をコピーする。
+--------------------------------------------
+page-property-list
+状態遷移図をリスト化している
+
+(:状態名 最初に展開するhtml htmlのリスト 適用関数のリスト)
+
+"最初に展開するhtml"　は "htmlのリスト"に入ってなければならない
+
+htmlのリストは
+	(キー名 who形式のリスト)
+例 '(main-page "hello world")
+例 '(main-page (:h2 "どうでしょう?"))
+
+あるいは
+	(キー名 file: テンプレートファイル名)
+
+テンプレートファイルは who 形式になっている必要がある。
+
+適用関数は基本的に同じ形式で次の形をとる。
+引数に hash-table をとり 戻り値は (キー バリュ) の形
+戻り値の例： '((status :init))
+
+(最初に適用する関数 それぞれに適用する関数 最後に適用する関数)
+
+hash-table は cgi のパラメータから自動的に作られる。
+例えば status=init&a="text"&b="1234" とあれば 
+'((status :init) (a "text") (b "1234")) とリスト化され、
+さらにこれが hash-table となる。バリューは status をのぞき
+文字列になる。数字ぽくても数字にはならないことに注意。
+status だけは特別にシンボルとなる。
+
+最初の cgi に hidden で status を入れておけば、評価されて
+シンボルになる。もし、status がなければ :init が自動的に設定される。
+
+そこで、status に対応する最初に適用する関数が適用され、
+つまり、パラメータから hash-table になったものを評価して、
+リストを返す。
+その最初の関数後、すぐに hash-table はリストの結果を反映して更新される。
+
+次に2番目の関数群が一つ一つ適用される。これは form の各アイテムのチェック用
+を想定している。関数が実行されても hash-table にはすぐには反映されない。
+すべての関数が実行されたのちに hash-table に反映される。
+
+そして、最後の関数が実行され、その結果が hash-table に反映される。
+そうして、実行された結果、通常、最後の関数で status の更新と
+なんらかのアクション(メールを送るなど）がされる。
+
+新しく得られたステータスから次のように page-property をとる
+  (setf page-property (asp:get-page-property status page-property-list))
+
+page-property は初期値だと、最初に状態名のキーワード、
+次に最初に展開する html そして html のリストとなる。
+
+(:状態名 最初に展開するhtml htmlのリスト 適用関数のリスト)
+
+初期値では最初に展開すhtml はそのままなので、
+    (asp:convert-page-property page-property)
+で展開してやる。すると、html のリストに従って展開することになる。
+簡単な例は
+      '(:simple main-page 
+		((main-page (:h2 "hello")))
+		(nil nil nil))
+
+展開されると
+	'(:simple (:h2 "hello") 
+			  ....)
+となる。
+htmlのリストに
+	(main-page (:h2 sub))
+	(sub "sub")
+と書いてあれば、sub が展開され、最終的に
+	(:h2 "sub")
+ができあがる。
+	(main-page (:div (:h2 sub) (:h3 g-value)))
+	(sub "sub")
+となると
+ここには g-value がない。のでその時点の
+レキシカルな展開をする。
+
+
+asp:convert-page-property で展開されてほしくないものは
+(:lisp-symbol message)
+とする。そうすると、asp:convert-page-property では展開されずに
+message が残る。
+一度展開されたものは二度展開しないように cgi で書くことによって
+次の make-content で動的に html を生成することができる
+
+(setf content (asp:make-content (cadr page-property) query-hash-table))
+
+make-content は( 展開された )who 形式のリストを
+htable(以前のステータスの関数が実行されたのちの query-string 群) をつかい
+さらに展開する。
+つまり cgi の form にあればそれをつかい、
+また、以前のステータス関数が生成すればそれをつかい、
+なければレキシカルな値(let で設定されていたり、グローバルに設定されていたり）
+をつかう
+
+最終的に得られた content を返せばよい。
+
+who:str などが必要な場合(どういう場合だ？次に示す)は
+(:lisp-symbol (who:str message))
+などとするとよい。
+
+	       (:textarea :name "message" :id "message"
+			  :rows "5" :cols "25"
+		       (:lisp-symbol (who:str message)))
+textarea は最後に "string" が必要こういうケース
+(:div :class "field"
+	       (:label :class "field-name" "氏名:")
+	       (:div (:lisp-symbol (who:str sender-fullname))))
+div もそう。これは html 的には <textarea> すとりんぐ </textarea>
+とか <div> すとりんぐ </div> のようなケース。
+(:input :type "text" :id "sender-e-mail"
+		       :name "sender-e-mail" :size "40"
+		       :value (:lisp-symbol sender-e-mail))
+
+のように :value に埋め込む場合は必要ない。

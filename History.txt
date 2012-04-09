@@ -1,0 +1,29 @@
+1.05
+	#> マクロの導入
+1.04
+	load-text-file の追加
+1.03
+	#P"html-data/" -> "html-data/"
+	階層化に対応
+1.02
+	tests の追加
+	:lib のサポート
+	sharp-html の追加
+1.01
+	プロパティリストの形式を変えた
+	defun convert-page-property (page-property)
+	で取る引数の形式を変えた
+	(:init main-page ((main-page :file "abc.who") ....))
+	だったのを
+	(main-page ((main-page :file "abc.who") ....))
+	にした。
+	呼び出し側は、元のリストの cdr を使い呼び出す必要がある。
+	これは make-contents.lisp が似たような形である
+	("index.html" ((main-page :file "abc.who") ....))
+	をとるようになったため。
+	リストの最初の car はもともと無視されるため、
+	返る必要はなかったが、意味が違うリストを処理させるのが
+	哲学的に受け入れられないため。変更した。
+
+1.00
+	最初のリリース contact-us.fcgi にかなり依存している
