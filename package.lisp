@@ -7,6 +7,7 @@
   (:nicknames :clasp :asp)
   (:export 
     :*html-data-dir*
+    :*prologue-flag*
     :eval-to-who 
     :prop-list-to-hash-table 
     :hash-table-to-let-list

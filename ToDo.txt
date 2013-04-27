@@ -5,6 +5,7 @@
 	thnak-you などのスタティックなページに飛ばすことができる。
 
 1.5) with-sharp-html-macro
+	-> with-sharp->-macro に変更された
 (with-sharp-html-macro
   (setf who-desc (asp:load-html-as-who file-name)))
 みたいなのをつくりたい。

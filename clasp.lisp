@@ -2,6 +2,7 @@
 
 ;;----------------------------------------------------------------
 (defparameter *html-data-dir* "html-data/")
+(defparameter *prologue-flag* nil)
 
 ;;----------------------------------------------------------------
 ; props list ¤Î :file, :lib Å¸³«ÍÑ
@@ -193,7 +194,7 @@
 	 (eval-content0
 	   (append '(let) (list new-args)))
 	 (eval-content1
-	   (append '(who:with-html-output (out)) (list content)))
+	   (append '(who:with-html-output (out nil :prologue *prologue-flag*)) (list content)))
 	 (eval-content2
 	   (append '(with-output-to-string (out)) (list eval-content1)))
 	 (eval-content3
