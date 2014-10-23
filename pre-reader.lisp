@@ -137,10 +137,13 @@
 					  (push #\# output)
 					  (push curr output)))))
 	      (t (push curr output)))
-	; count に達したら折り返す
-	(incf count)
+
+	(if (not (char= #\# curr))
+	  (incf count))
+
 	(if (char= #\newline curr)
 	  (setf count 0)
+	  ; count に達したら折り返す
 	  (when (= count *pre-line-n*)
 	    (setf count 0)
 	    (push #\newline output)))

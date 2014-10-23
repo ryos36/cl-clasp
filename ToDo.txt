@@ -1,3 +1,26 @@
+0) #のばぐ
+#>PTEXT :P
+logiFMC-FPD-II は FPD-Link II のチャネルを
+最大４つ使用可能である FMC ドータカードで、
+#the-Xilinx
+の評価プラットフォームに最適です。
+#the-Xilinx
+
+#the-Spartan-6
+を搭載した SP605 評価キットでの動作実績があります。
+PTEXT
+
+のように連続した # はなぜか空行を開ける必要がある。
+
+#the-Xilinx
+#the-Spartan-6
+
+と続けると２行目がうまく評価されない
+のを
+        (if (not (char= #\# curr))
+	            (incf count))
+とダサく対応
+
 1) HTTP ヘッダのコントロール
 	post-func などに HTTP のヘッダに追加したい情報書いて、あれば
 	ついかするようにする。
