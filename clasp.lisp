@@ -241,7 +241,7 @@
 	    (list property)))))
 
 (defun merge-list-to-hash-table (lst hash-table)
-  (if (and lst hash-table)
+  (if (and lst (listp lst) hash-table)
     (mapcar #'(lambda (x)
 		(let ((key (car x))
 		      (value (cadr x)))
@@ -251,12 +251,18 @@
 ;名前がよくない
 ;update もするが、各関数を funcall して、その結果を
 ;反映させる関数
+(defun update-hash-table0 (hash-table func-or-funcs)
+  (let ((func-list (if (listp func-or-funcs) func-or-funcs (list func-or-funcs))))
+      (mapcar #'(lambda (func) 
+		  (if func
+		    (merge-list-to-hash-table (funcall func hash-table) hash-table))) func-list)))
+
 (defun update-hash-table (hash-table page-property)
   (let ((funcs (cadddr page-property)))
     (let ((pre-func (car funcs))
 	  (check-funcs (cadr funcs))
-	  (post-func (caddr funcs))
-	  lst-lst)
+	  (post-func (caddr funcs)))
+#|
       (if pre-func
 	(merge-list-to-hash-table (funcall pre-func hash-table) hash-table))
       (if check-funcs
@@ -266,5 +272,9 @@
 
       (if post-func
 	(merge-list-to-hash-table (funcall post-func hash-table) hash-table))
+|#
+      (update-hash-table0 hash-table pre-func)	
+      (update-hash-table0 hash-table check-funcs)	
+      (update-hash-table0 hash-table post-func)	
       hash-table)))
 
