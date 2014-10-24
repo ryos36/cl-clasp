@@ -1,31 +1,33 @@
+1.07
+    UTF-8 に変更
 1.06
-    metallica ��ȯ�������Х��ν���
+    metallica で発見したバグの修正
 1.05
-	#> �ޥ�����Ƴ��
+	#> マクロの導入
 1.04
-	load-text-file ���ɲ�
+	load-text-file の追加
 1.03
 	#P"html-data/" -> "html-data/"
-	���ز����б�
+	階層化に対応
 1.02
-	tests ���ɲ�
-	:lib �Υ��ݡ���
-	sharp-html ���ɲ�
+	tests の追加
+	:lib のサポート
+	sharp-html の追加
 1.01
-	�ץ��ѥƥ��ꥹ�Ȥη������Ѥ���
+	プロパティリストの形式を変えた
 	defun convert-page-property (page-property)
-	�Ǽ������η������Ѥ���
+	で取る引数の形式を変えた
 	(:init main-page ((main-page :file "abc.who") ....))
-	���ä��Τ�
+	だったのを
 	(main-page ((main-page :file "abc.who") ....))
-	�ˤ�����
-	�ƤӽФ�¦�ϡ����Υꥹ�Ȥ� cdr ��Ȥ��ƤӽФ�ɬ�פ����롣
-	����� make-contents.lisp �������褦�ʷ��Ǥ���
+	にした。
+	呼び出し側は、元のリストの cdr を使い呼び出す必要がある。
+	これは make-contents.lisp が似たような形である
 	("index.html" ((main-page :file "abc.who") ....))
-	��Ȥ�褦�ˤʤä����ᡣ
-	�ꥹ�Ȥκǽ�� car �Ϥ�Ȥ��̵�뤵��뤿�ᡢ
-	�֤�ɬ�פϤʤ��ä�������̣���㤦�ꥹ�Ȥ����������Τ�
-	ů��Ū�˼���������ʤ����ᡣ�ѹ�������
+	をとるようになったため。
+	リストの最初の car はもともと無視されるため、
+	返る必要はなかったが、意味が違うリストを処理させるのが
+	哲学的に受け入れられないため。変更した。
 
 1.00
-	�ǽ�Υ�꡼�� contact-us.fcgi �ˤ��ʤ��¸���Ƥ���
+	最初のリリース contact-us.fcgi にかなり依存している

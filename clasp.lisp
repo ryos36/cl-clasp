@@ -5,26 +5,26 @@
 (defparameter *prologue-flag* nil)
 
 ;;----------------------------------------------------------------
-; props list ¤Î :file, :lib Å¸³«ÍÑ
+; props list ã® :file, :lib å±•é–‹ç”¨
 (defun load-template-file (file-name)
-  "html-data-dir ¤«¤é»ØÄê¤µ¤ì¤¿¥Æ¥ó¥×¥ì¡¼¥È¤òÆÉ¤à"
+  "html-data-dir ã‹ã‚‰æŒ‡å®šã•ã‚ŒãŸãƒ†ãƒ³ãƒ—ãƒ¬ãƒ¼ãƒˆã‚’èª­ã‚€"
 
   (with-open-file (in (merge-pathnames (concatenate 'string *html-data-dir* file-name)))
     (read in)))
 
 #|
-¸Å¤¤¥Ğ¡¼¥¸¥ç¥ó
-Ì¾»ÄÀãÅª¤ËÃÖ¤¤¤Æ¤¢¤ë
+å¤ã„ãƒãƒ¼ã‚¸ãƒ§ãƒ³
+åæ®‹é›ªçš„ã«ç½®ã„ã¦ã‚ã‚‹
 (defun make-key-quote-value (one-prop)
-  "Í¿¤¨¤é¤ì¤¿ '(key value) ¤«¤é quote ¤µ¤ì¤¿ÃÍ¤ò¤È¤ë"
+  "ä¸ãˆã‚‰ã‚ŒãŸ '(key value) ã‹ã‚‰ quote ã•ã‚ŒãŸå€¤ã‚’ã¨ã‚‹"
 
 	(let ((key (car one-prop))
 	      (value (cadr one-prop)))
 	  (list key (list 'quote value))))
 
 (defun make-key-quote-value (one-prop)
-  "Í¿¤¨¤é¤ì¤¿ '(key value) ¤«¤é quote ¤µ¤ì¤¿ÃÍ¤ò¤È¤ë¡£
-   ¥­¡¼¥ï¡¼¥É¤Ë¤·¤¿¤éÉ¬Í×¤Ê¤¯¤Ê¤Ã¤¿´Ø¿ô"
+  "ä¸ãˆã‚‰ã‚ŒãŸ '(key value) ã‹ã‚‰ quote ã•ã‚ŒãŸå€¤ã‚’ã¨ã‚‹ã€‚
+   ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã«ã—ãŸã‚‰å¿…è¦ãªããªã£ãŸé–¢æ•°"
 
         (let ((key (car one-prop))
               (value (cadr one-prop))
@@ -36,9 +36,9 @@
 
 ;;----------------------------------------------------------------
 (defun prop-list-to-hash-table (prop-list &optional h)
-  "prop-list ¤Î·Á¼°¤Î¤â¤Î¤ò hash-table ¤ËÅ¸³«¤¹¤ë¡£
-   hash-table ¤Ï»ØÄê¤µ¤ì¤Ê¤«¤Ã¤¿¤é make ¤¹¤ë¡£
-   prop-list ¤Ë¤Ä¤¤¤Æ¤Ï¤³¤Î ReadMe.txt ÀâÌÀ¤ò½ñ¤¯"
+  "prop-list ã®å½¢å¼ã®ã‚‚ã®ã‚’ hash-table ã«å±•é–‹ã™ã‚‹ã€‚
+   hash-table ã¯æŒ‡å®šã•ã‚Œãªã‹ã£ãŸã‚‰ make ã™ã‚‹ã€‚
+   prop-list ã«ã¤ã„ã¦ã¯ã“ã® ReadMe.txt èª¬æ˜ã‚’æ›¸ã"
 
   (if (null h) (setf h (make-hash-table)))
   (dolist (x prop-list)
@@ -63,12 +63,12 @@
 	(setf (gethash key h) updated-value))))
   h)
 
-; ¤Î¤Á¤Ë let ¤Ç eval ¤·¤ä¤¹¤¤¤è¤¦¤Ë quote ¤ò¤¤¤ì¤Æ¤¤¤ë¡£
-; ¤¿¤È¤¨¤Ğ ((a (:h1 "title"))) ¤Ç let ¤Î¼°¤ò¤Ä¤¯¤ë¤È
-; (let ((a (:h1 "title"))) .... ) ¤³¤ì¤òÉ¾²Á¤¹¤ë¤È
-; (:h1 "title") ¤òÉ¾²Á¤¹¤ë¤³¤È¤Ë¤Ê¤ê¥¨¥é¡¼
-; (let ((a '(:h1 "title"))) .... ) ¤³¤ì¤òÉ¾²Á¤¹¤ë¤È
-; ¤È¤¤¤¦¼°¤òºî¤ê¤¿¤¤¡£
+; ã®ã¡ã« let ã§ eval ã—ã‚„ã™ã„ã‚ˆã†ã« quote ã‚’ã„ã‚Œã¦ã„ã‚‹ã€‚
+; ãŸã¨ãˆã° ((a (:h1 "title"))) ã§ let ã®å¼ã‚’ã¤ãã‚‹ã¨
+; (let ((a (:h1 "title"))) .... ) ã“ã‚Œã‚’è©•ä¾¡ã™ã‚‹ã¨
+; (:h1 "title") ã‚’è©•ä¾¡ã™ã‚‹ã“ã¨ã«ãªã‚Šã‚¨ãƒ©ãƒ¼
+; (let ((a '(:h1 "title"))) .... ) ã“ã‚Œã‚’è©•ä¾¡ã™ã‚‹ã¨
+; ã¨ã„ã†å¼ã‚’ä½œã‚ŠãŸã„ã€‚
 
 (defun hash-table-to-let-list (h)
   (let ((acc nil))
@@ -77,22 +77,22 @@
 		   (list key (list 'quote value)) acc)) h)
     acc))
 
-; string ¤«¤é symbol ¤ò¤Ä¤¯¤ë¡£¤â¤Ã¤È´ÊÃ±¤ÊÊıË¡¤¬¤¢¤ê¤½¤¦¤À¤¬
-; ext:string-concat ¤¬¤Ä¤«¤¨¤Ê¤«¤Ã¤¿¤Î¤Ç concatenate ¤ò»È¤¦
-; (ext:string-concat "a" "b") ¤À¤Ã¤¿
-; (concatenate 'string "a" "b") ¤È¤¹¤ë¤Î¤¬¶Ú¡©
-; ¥¹¥Ô¡¼¥ÉÅª¤Ë¤Ï ext:string-concat ¤¬°ìÈÖÁá¤¤
-; GC ¤Ï¡¡concatenate ¤¬°ìÈÖ¾¯¤Ê¤¤
-; format ¤ÏÃÙ¤¹¤®¤ë¾å¤Ë GC ²ó¿ô¤âÂ¿¤¤¤Î¤Ç»È¤ï¤Ê¤¤¤³¤È¤Ë¤·¤¿
-; (clisp ¾å)
+; string ã‹ã‚‰ symbol ã‚’ã¤ãã‚‹ã€‚ã‚‚ã£ã¨ç°¡å˜ãªæ–¹æ³•ãŒã‚ã‚Šãã†ã ãŒ
+; ext:string-concat ãŒã¤ã‹ãˆãªã‹ã£ãŸã®ã§ concatenate ã‚’ä½¿ã†
+; (ext:string-concat "a" "b") ã ã£ãŸ
+; (concatenate 'string "a" "b") ã¨ã™ã‚‹ã®ãŒç­‹ï¼Ÿ
+; ã‚¹ãƒ”ãƒ¼ãƒ‰çš„ã«ã¯ ext:string-concat ãŒä¸€ç•ªæ—©ã„
+; GC ã¯ã€€concatenate ãŒä¸€ç•ªå°‘ãªã„
+; format ã¯é…ã™ãã‚‹ä¸Šã« GC å›æ•°ã‚‚å¤šã„ã®ã§ä½¿ã‚ãªã„ã“ã¨ã«ã—ãŸ
+; (clisp ä¸Š)
 (defun string-to-keyword (str)
   (with-input-from-string (in (concatenate 'string ":" str)) (read in)))
 
 (defun string-to-symbol (str)
   (with-input-from-string (in str) (read in)))
 
-; Ã±½ã¤Ë value ¤òÊÖ¤¹¤Î¤Ç¤Ï¤Ê¤¯
-; key ¤¬ status ¤Ç¤¢¤Ã¤¿¤È¤­¤Ë¥­¡¼¥ï¡¼¥É¤òÊÖ¤¹
+; å˜ç´”ã« value ã‚’è¿”ã™ã®ã§ã¯ãªã
+; key ãŒ status ã§ã‚ã£ãŸã¨ãã«ã‚­ãƒ¼ãƒ¯ãƒ¼ãƒ‰ã‚’è¿”ã™
 (defun key-value-converter (key value-str &key (converter #'identity))
   (if (eq key 'cl-user::status) (string-to-keyword value-str)
     (funcall converter value-str)))
@@ -111,10 +111,10 @@
   h)
 
 (defun eval-to-one-who (symbol-content &optional args)
-  "eval-to-who ¤Î¥Ø¥ë¥Ñ¡¼´Ø¿ô¡£
-   symbol-content ¤ò args ¤Î´Ä¶­¤ò»È¤Ã¤ÆÉ¾²Á¤¹¤ë¡£
-   symbol-content ¤Ï lisp ¤Ç¤¢¤ë¤³¤È¤òÁ°Äó¤Ë¤·¤Æ¤¤¤ë¡£
-   ¤Ä¤Ş¤ê ¥·¥ó¥Ü¥ë¤« (func ...) ¤Î·Á¼°"
+  "eval-to-who ã®ãƒ˜ãƒ«ãƒ‘ãƒ¼é–¢æ•°ã€‚
+   symbol-content ã‚’ args ã®ç’°å¢ƒã‚’ä½¿ã£ã¦è©•ä¾¡ã™ã‚‹ã€‚
+   symbol-content ã¯ lisp ã§ã‚ã‚‹ã“ã¨ã‚’å‰æã«ã—ã¦ã„ã‚‹ã€‚
+   ã¤ã¾ã‚Š ã‚·ãƒ³ãƒœãƒ«ã‹ (func ...) ã®å½¢å¼"
 
   (let* ((eval-content0
 	   (append '(let) (list args)))
@@ -128,13 +128,13 @@
       (format t "eval-to-one-who:1:~s~%" eval-content1))
     (eval eval-content1)))
 
-; ¤Ê¤ó¤È¤Ê¤¯¤À¤¬¤³¤Î¼ê¤Î¤Ï macro ¤ò»È¤Ã¤¿Êı¤¬¤â¤Ã¤È
-; ¤¹¤Ê¤ª¤Ë½ñ¤±¤ëµ¤¤¬¤¹¤ë¡£
+; ãªã‚“ã¨ãªãã ãŒã“ã®æ‰‹ã®ã¯ macro ã‚’ä½¿ã£ãŸæ–¹ãŒã‚‚ã£ã¨
+; ã™ãªãŠã«æ›¸ã‘ã‚‹æ°—ãŒã™ã‚‹ã€‚
 (defun eval-to-who (content &optional args)
-  "content ¤ÇÍè¤¿°ú¿ô¤òÉ¾²Á¤· cl-who ·Á¼°¤Î¥Ç¡¼¥¿¤òÊÖ¤¹
-   content ¤Ï cl-who ·Á¼°¤«¥ê¥¹¥×¼°¡£args ¤Ë´Ä¶­¤òÆş¤ì¤Æ¤ª¤¯¤È
-   ¤½¤ì¤ò¤â¤È¤ËÉ¾²Á¤¹¤ë¡£¤³¤³¤ÇÉ¾²Á¤µ¤ì¤¿¤¯¤Ê¤¤¤â¤Î(ÃÙ±äÉ¾²Á¡©)
-   ¤Ï (:lisp-symbol symbol) ¤È½ñ¤¤¤Æ¤ª¤¯¤È symbol ¤ËÅ¸³«¤µ¤ì¤ë¡£"
+  "content ã§æ¥ãŸå¼•æ•°ã‚’è©•ä¾¡ã— cl-who å½¢å¼ã®ãƒ‡ãƒ¼ã‚¿ã‚’è¿”ã™
+   content ã¯ cl-who å½¢å¼ã‹ãƒªã‚¹ãƒ—å¼ã€‚args ã«ç’°å¢ƒã‚’å…¥ã‚Œã¦ãŠãã¨
+   ãã‚Œã‚’ã‚‚ã¨ã«è©•ä¾¡ã™ã‚‹ã€‚ã“ã“ã§è©•ä¾¡ã•ã‚ŒãŸããªã„ã‚‚ã®(é…å»¶è©•ä¾¡ï¼Ÿ)
+   ã¯ (:lisp-symbol symbol) ã¨æ›¸ã„ã¦ãŠãã¨ symbol ã«å±•é–‹ã•ã‚Œã‚‹ã€‚"
 
   #+:p-debug
   (format t "eval-to-who:~a~%" content)
@@ -159,34 +159,34 @@
 		       (nreverse acc))))))))
 
 ;make-content-string
-;make-content-string2 ¤Ê¤É¤¬¤¢¤ë¤±¤É¡¢¡¢¡¢
-;contact-us.fcgi ¤Ç¤Ï¤³¤ì¤òºÇ½ªÅª¤Ë»È¤Ã¤Æ¤¤¤ë
-;defmacro ¤ò»È¤Ã¤¿Êı¤¬¤è¤¤¡©
-;nconvert-page-property ·ĞÍ³¤Ç eval-to-who ¤ò¤Ä¤«¤Ã¤Æ¤¤¤ë¡£
+;make-content-string2 ãªã©ãŒã‚ã‚‹ã‘ã©ã€ã€ã€
+;contact-us.fcgi ã§ã¯ã“ã‚Œã‚’æœ€çµ‚çš„ã«ä½¿ã£ã¦ã„ã‚‹
+;defmacro ã‚’ä½¿ã£ãŸæ–¹ãŒã‚ˆã„ï¼Ÿ
+;nconvert-page-property çµŒç”±ã§ eval-to-who ã‚’ã¤ã‹ã£ã¦ã„ã‚‹ã€‚
 (defun make-content (content &optional args)
-  "cl-who ·Á¼°¤Î content ¤òÅ¸³«¤·¤Æ HTML ¤Ë¤¹¤ë¡£
-  ¤½¤Î¤È¤­ args ¤ò´Ä¶­¤È¤·¤Æ»È¤¦¡£
-  ´Ä¶­¤ò¤È¤â¤Ê¤Ã¤¿É¾²Á¤òÆş¤ì»Ò¤Ë¤Ç¤­¤Ê¤¤¤Î¤Ç¶¨ÎÏ¤Ç¤Ï¤Ê¤¤
-  Îã¤¨¤Ğ
+  "cl-who å½¢å¼ã® content ã‚’å±•é–‹ã—ã¦ HTML ã«ã™ã‚‹ã€‚
+  ãã®ã¨ã args ã‚’ç’°å¢ƒã¨ã—ã¦ä½¿ã†ã€‚
+  ç’°å¢ƒã‚’ã¨ã‚‚ãªã£ãŸè©•ä¾¡ã‚’å…¥ã‚Œå­ã«ã§ããªã„ã®ã§å”åŠ›ã§ã¯ãªã„
+  ä¾‹ãˆã°
   (let ((gege "xyz"))
       (format t "~s~%"
 	      (asp:make-content '(:div (who:fmt gege)) '((xgege "xabc")))))
-  ¤³¤ì¤Ï gege ¤òÅ¸³«¤Ç¤­¤Ê¤¤¡£
+  ã“ã‚Œã¯ gege ã‚’å±•é–‹ã§ããªã„ã€‚
   (setf gege "xyz")
   (format t "~s~%"
 	  (asp:make-content '(:div (who:fmt gege)) '((xgege "xabc"))))
-  ¤Ê¤éÂç¾æÉ×
+  ãªã‚‰å¤§ä¸ˆå¤«
 
   (:h2 lisp-symbol)
-  ¤È¤¢¤Ã¤¿¤é¡¢lisp-symbol ¤ò args ¤Ë¤·¤¿¤¬¤Ã¤Æ¡¢ÃÖ¤­´¹¤¨¤ë¤³¤È¤Ï½ĞÍè¤ë¡£
-  ÃÖ¤­´¹¤¨¤¿·ë²Ì¤¬
-  (:h2 (:a :href url new-lisp-symbol)) ¤À¤Ã¤¿¤é
-  ËÜÅö¤Ï¤½¤³¤«¤é url ¤ä new-lisp-symbol ¤âÃÖ¤­´¹¤¨¤ÆÉ¾²Á¤·¤Æ¤Û¤·¤¤¡£
-  ¤¬¤½¤³¤Ş¤Ç¤Ç¤­¤Ê¤¤¡£ ½ĞÍè¤ë¤è¤¦¤Ë¡¡eval-to-who ¤ò³«È¯¤·¤¿¡£
-  eval-to-who ¤Ï who·Á¼°¤«¤é who·Á¼°¤ËÅ¸³«¤¹¤ë
-  eval-to-who ¤Ç who·Á¼°¤òÅ¸³«¤·¤Æ·ë²Ì¤Ï who ·Á¼°¤À¤¬¡¢
-  ·ë²Ì¤È¤·¤ÆÂ¿ÃÊ¤Î lisp-symbol ¤¬¤Ê¤¯¤Ê¤ë¡£
-  ¤½¤³¤Ç¡¢make-content ¤ò°ìÃÊÊÑ´¹¤Ç»È¤¨¤Ğ¤è¤¤¡£"
+  ã¨ã‚ã£ãŸã‚‰ã€lisp-symbol ã‚’ args ã«ã—ãŸãŒã£ã¦ã€ç½®ãæ›ãˆã‚‹ã“ã¨ã¯å‡ºæ¥ã‚‹ã€‚
+  ç½®ãæ›ãˆãŸçµæœãŒ
+  (:h2 (:a :href url new-lisp-symbol)) ã ã£ãŸã‚‰
+  æœ¬å½“ã¯ãã“ã‹ã‚‰ url ã‚„ new-lisp-symbol ã‚‚ç½®ãæ›ãˆã¦è©•ä¾¡ã—ã¦ã»ã—ã„ã€‚
+  ãŒãã“ã¾ã§ã§ããªã„ã€‚ å‡ºæ¥ã‚‹ã‚ˆã†ã«ã€€eval-to-who ã‚’é–‹ç™ºã—ãŸã€‚
+  eval-to-who ã¯ whoå½¢å¼ã‹ã‚‰ whoå½¢å¼ã«å±•é–‹ã™ã‚‹
+  eval-to-who ã§ whoå½¢å¼ã‚’å±•é–‹ã—ã¦çµæœã¯ who å½¢å¼ã ãŒã€
+  çµæœã¨ã—ã¦å¤šæ®µã® lisp-symbol ãŒãªããªã‚‹ã€‚
+  ãã“ã§ã€make-content ã‚’ä¸€æ®µå¤‰æ›ã§ä½¿ãˆã°ã‚ˆã„ã€‚"
 
   (let* ((new-args
 	   (if (hash-table-p args) (hash-table-to-let-list args)
@@ -218,10 +218,10 @@
 (defun page-property-is-already-converted (page-property)
   (null (caddr page-property)))
 
-; °ìÅÙ hash-table¡¡¤Ë¤·¤Æ¤«¤é let-list ¤Ë¤·¤Æ¤¤¤ë
-; ¤³¤ì¤Ï¾éÄ¹¤À¡£¥À¥¤¥ì¥¯¥È¤ËÊÑ´¹¤¹¤ë´Ø¿ô¤òºî¤ë¤Ù¤­¡£
+; ä¸€åº¦ hash-tableã€€ã«ã—ã¦ã‹ã‚‰ let-list ã«ã—ã¦ã„ã‚‹
+; ã“ã‚Œã¯å†—é•·ã ã€‚ãƒ€ã‚¤ãƒ¬ã‚¯ãƒˆã«å¤‰æ›ã™ã‚‹é–¢æ•°ã‚’ä½œã‚‹ã¹ãã€‚
 ;
-; ÀÅÅª¤Ë who ¤«¤é who ÊÑ´¹¤ò¤· page-property ¤Ë½ñ¤­Ìá¤·¤Æ¤¤¤ë¡£
+; é™çš„ã« who ã‹ã‚‰ who å¤‰æ›ã‚’ã— page-property ã«æ›¸ãæˆ»ã—ã¦ã„ã‚‹ã€‚
 (defun nconvert-page-property (page-property)
   (let ((main-content (car page-property))
 	(let-list (asp:hash-table-to-let-list (asp:prop-list-to-hash-table (cadr page-property)))))
@@ -248,9 +248,9 @@
 		  (setf (gethash key hash-table) value))) lst))
   t)
 
-;Ì¾Á°¤¬¤è¤¯¤Ê¤¤
-;update ¤â¤¹¤ë¤¬¡¢³Æ´Ø¿ô¤ò funcall ¤·¤Æ¡¢¤½¤Î·ë²Ì¤ò
-;È¿±Ç¤µ¤»¤ë´Ø¿ô
+;åå‰ãŒã‚ˆããªã„
+;update ã‚‚ã™ã‚‹ãŒã€å„é–¢æ•°ã‚’ funcall ã—ã¦ã€ãã®çµæœã‚’
+;åæ˜ ã•ã›ã‚‹é–¢æ•°
 (defun update-hash-table0 (hash-table func-or-funcs)
   (let ((func-list (if (listp func-or-funcs) func-or-funcs (list func-or-funcs))))
       (mapcar #'(lambda (func) 

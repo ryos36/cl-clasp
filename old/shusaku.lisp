@@ -1,12 +1,12 @@
 
 ;deprected...
 (defun make-content-string-simple (content)
-  "½¬ºî¡£
-   content ¤òÉ¾²Á¤·¤Æ who:with-html-output ¤Ê¤É¤òÄÉ²Ã¤·¤Æ
-   ºÇ½ªÅª¤ËÉ¾²Á¤¹¤ë¡£
-   setf ¤ò»È¤¨¤Ğ¤¤¤¤¤³¤È¤Ë¸å¤Çµ¤¤¬ÉÕ¤¤¤¿¡£
-   ¤Ç¡¢·ë¶É¤³¤ì¤Ã¤Æ¥Ş¥¯¥í¤ò¤Ä¤«¤¦¤ó¤À¤Ê¤¡¤È¡¢
-   ¤³¤ì¤â¸å¤Çµ¤¤¬ÉÕ¤¤¤¿¡£"
+  "ç¿’ä½œã€‚
+   content ã‚’è©•ä¾¡ã—ã¦ who:with-html-output ãªã©ã‚’è¿½åŠ ã—ã¦
+   æœ€çµ‚çš„ã«è©•ä¾¡ã™ã‚‹ã€‚
+   setf ã‚’ä½¿ãˆã°ã„ã„ã“ã¨ã«å¾Œã§æ°—ãŒä»˜ã„ãŸã€‚
+   ã§ã€çµå±€ã“ã‚Œã£ã¦ãƒã‚¯ãƒ­ã‚’ã¤ã‹ã†ã‚“ã ãªãã¨ã€
+   ã“ã‚Œã‚‚å¾Œã§æ°—ãŒä»˜ã„ãŸã€‚"
 
   (let* ((eval-content0
           (append '(who:with-html-output (out)) (list content)))
@@ -16,9 +16,9 @@
 
 ;deprected...
 (defmacro make-content-string (content &body body)
-  "Æ±¤¸¤è¤¦¤Ë defmacro ¤ò¤Ä¤«¤Ã¤¿¡£setf ¤ò»È¤¨¤Ğ¤¤¤¤¤Î¤«
-   ¤¢¤ë¤¤¤Ï¤â¤Ã¤È¥Ş¥¯¥í¤ò¤¦¤Ş¤¯»È¤¨¤Ğ¤¤¤¤¤Î¤«¡£
-   ½¬ºî¤Ë¤·¤Æ¤Ï½ĞÍè¤¬°­¤¤"
+  "åŒã˜ã‚ˆã†ã« defmacro ã‚’ã¤ã‹ã£ãŸã€‚setf ã‚’ä½¿ãˆã°ã„ã„ã®ã‹
+   ã‚ã‚‹ã„ã¯ã‚‚ã£ã¨ãƒã‚¯ãƒ­ã‚’ã†ã¾ãä½¿ãˆã°ã„ã„ã®ã‹ã€‚
+   ç¿’ä½œã«ã—ã¦ã¯å‡ºæ¥ãŒæ‚ªã„"
   `(let* ((eval-content00
             (append '(let) (quote ,(if (null body) '(()) body))))
           (eval-content0
@@ -31,7 +31,7 @@
 
 ;deprected...
 (defun make-content-string2 (content &optional args)
-  "¤³¤ì¤â½ĞÍè¤¬°­¤¤¤¤"
+  "ã“ã‚Œã‚‚å‡ºæ¥ãŒæ‚ªã„ã„"
   (let* ((eval-content0
 	   (append '(let) (list args)))
 	 (eval-content1

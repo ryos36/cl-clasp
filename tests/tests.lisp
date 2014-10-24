@@ -15,7 +15,7 @@
 (format t "~s~%" h)
 
 (asp:use-sharp-html-macro)
-(setf html-who #<<div> "¤É¤¦¤Ç¤¹¤«¤Í" </div>>#)
+(setf html-who #<<div> "ã©ã†ã§ã™ã‹ã­" </div>>#)
 (format t "~s~%" html-who)
 
 (format t "~s~%" 

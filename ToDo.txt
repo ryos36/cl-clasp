@@ -1,72 +1,72 @@
-0) #�ΤФ�
+0) #のばぐ
 #>PTEXT :P
-logiFMC-FPD-II �� FPD-Link II �Υ���ͥ��
-���磴�Ļ��Ѳ�ǽ�Ǥ��� FMC �ɡ��������ɤǡ�
+logiFMC-FPD-II は FPD-Link II のチャネルを
+最大４つ使用可能である FMC ドータカードで、
 #the-Xilinx
-��ɾ���ץ�åȥե�����˺�Ŭ�Ǥ���
+の評価プラットフォームに最適です。
 #the-Xilinx
 
 #the-Spartan-6
-����ܤ��� SP605 ɾ�����åȤǤ�ư����Ӥ�����ޤ���
+を搭載した SP605 評価キットでの動作実績があります。
 PTEXT
 
-�Τ褦��Ϣ³���� # �Ϥʤ������Ԥ򳫤���ɬ�פ����롣
+のように連続した # はなぜか空行を開ける必要がある。
 
 #the-Xilinx
 #the-Spartan-6
 
-��³����ȣ����ܤ����ޤ�ɾ������ʤ�
-�Τ�
+と続けると２行目がうまく評価されない
+のを
         (if (not (char= #\# curr))
 	            (incf count))
-�ȥ������б�
+とダサく対応
 
-1) HTTP �إå��Υ���ȥ�����
-	post-func �ʤɤ� HTTP �Υإå����ɲä���������񤤤ơ������
-	�Ĥ�������褦�ˤ��롣
-	Lcation �Ȥ����إå����ɲä����
-	thnak-you �ʤɤΥ����ƥ��å��ʥڡ��������Ф����Ȥ��Ǥ��롣
+1) HTTP ヘッダのコントロール
+	post-func などに HTTP のヘッダに追加したい情報書いて、あれば
+	ついかするようにする。
+	Lcation というヘッダを追加すれば
+	thnak-you などのスタティックなページに飛ばすことができる。
 
 1.5) with-sharp-html-macro
-	-> with-sharp->-macro ���ѹ����줿
+	-> with-sharp->-macro に変更された
 (with-sharp-html-macro
   (setf who-desc (asp:load-html-as-who file-name)))
-�ߤ����ʤΤ�Ĥ��ꤿ����
-����
+みたいなのをつくりたい。
+今は
 (asp:use-sharp-html-macro)
 (setf who-desc (asp:load-html-as-who file-name))
-�Ȥ���ɬ�פ��ꡣ
+とする必要あり。
 
 
-2) :init �����ѿ�ɾ��
-�ǽ�� :init �ΤȤ��˲��� h-table �ˤʤ���
-form ����Ƥ⤤�ʤ��ΤǤʤˤ�ʤ���
-	=> ���ʤ� form.html ��Ĥ���
-           ����Ǥ�ľ�ܸƤФ줿�����б���ɬ��
+2) :init 時の変数評価
+最初に :init のときに何も h-table にない。
+form で来てもいないのでなにもない。
+	=> 前段に form.html をつくる
+           それでも直接呼ばれた時の対応が必要
 
-:init �Υ���ƥ�Ĥ�ɾ�����褦�Ȥ��ơ��Ǹ�ޤǲ��Ǥ����˥��顼��
-(init h-table) �Ȥ����ؿ����ä��б���
+:init のコンテンツを評価しようとして、最後まで解決できずにエラー。
+(init h-table) という関数を作って対応。
 
-�ؿ����б��Ǥ��뤳�Ȥ�ʬ���ä��� ���ߤ� (init) �Ǽ¹�
-������ѿ������ɬ�פ����롣-> �롼��/��ư��ɬ�ס�
-	pre -> status ��̵������ɲ�
-	post-> ���ѿ���̵������ɲ�
+関数で対応できることが分かった。 現在は (init) で実行
+初期化変数を決める必要がある。-> ルール/自動化必要。
+	pre -> status が無ければ追加
+	post-> 各変数が無ければ追加
 
-3) ɾ�������Ȥ��˥��顼�ˤʤä����ν���
-	-> �ǥХå������ˤ���
-	-> �ƤӽФ�¦�� handler-case ��Ĥ��äƤ���
+3) 評価したときにエラーになった時の処理
+	-> デバッグがしにくい
+	-> 呼び出す側で handler-case をつかってくれ
 
 ----------- Bug
 sharp-html
-	�ʤ��� #<<>># �ȤĤŤ��ʤ��ȥ��顼�ˤʤ롣
-	JavaScript �� "  " ������Ȳ��ϤǤ��ʤ���
+	なぜか #<<>># とつづけないとエラーになる。
+	JavaScript の "  " をちゃんと解析できない。
 
 make-context
-	((:table ))... �Ȥ��Ƥ���Ȥ��ʤ���(table �Ȥ���°��̾�ϴط��ʤ�)
-	���ͤ� (:table ...) �Ȥ��뤳�Ȥ��׵ᤷ�Ƥ���ʤϤ���
-		() ���ҤȤ�¿���ä�������
-	((:div) (:table ...)) �Ȱ�Ĥ��ޤ������Ȥ��Ǥ��롣
-	�������ʤ��� <div> <table> ... </table> </div> �Ȥʤ롣
-	��ư����������������ʳ��Ϥ��ޤ��Ĥ�����Τ� 
-	Copy & Paste �Ǥ��Τ��롣
+	((:table ))... としても中身がない。(table という属性名は関係ない)
+	仕様は (:table ...) とすることを要求している（はず）
+		() がひとつ多かった、、、
+	((:div) (:table ...)) と一個かませると中身ができる。
+	ただしなぜか <div> <table> ... </table> </div> となる。
+	挙動がおかしいがそれ以外はうまくつかえるので 
+	Copy & Paste でしのげる。
 

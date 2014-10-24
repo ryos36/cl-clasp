@@ -311,7 +311,7 @@ Returns a new string.  Does not alter the encoded string."
     ))
 
 ;;----------------------------------------------------------------
-; fastcgi ¤Ë°ÍÂ¸¤·¤Æ¤¤¤ë
+; fastcgi ã«ä¾å­˜ã—ã¦ã„ã‚‹
 (defun get-query-string ()
   (decode-token 
     (cond ((string-equal (fastcgi:getenv "REQUEST_METHOD") "POST")
@@ -334,10 +334,10 @@ Returns a new string.  Does not alter the encoded string."
 	 '((,func-name t))
 	 '((,func-name nil))))))
 
-;; ¤¿¤Ö¤ó¤¤¤¤¤È¤ª¤â¤¦¤±¤É
-;; ¥Æ¥¹¥È¤·¤Æ¤¤¤Ê¤¤¡£¾å¤Î´Ø¿ô¤¬¼ÂÀÓ¤¬¤¢¤ë¡£
+;; ãŸã¶ã‚“ã„ã„ã¨ãŠã‚‚ã†ã‘ã©
+;; ãƒ†ã‚¹ãƒˆã—ã¦ã„ãªã„ã€‚ä¸Šã®é–¢æ•°ãŒå®Ÿç¸¾ãŒã‚ã‚‹ã€‚
 (defmacro make-checker (func-name name)
-  "name ¤¬ h-table ¤Ë¤¢¤ë¤«¤É¤¦¤«¤òÊÖ¤¹´Ø¿ô¤òÊÖ¤¹"
+  "name ãŒ h-table ã«ã‚ã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™é–¢æ•°ã‚’è¿”ã™"
   `(defun ,func-name (h-table)
      (let ((value (gethash ',name h-table)))
        '((,func-name 

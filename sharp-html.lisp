@@ -1,8 +1,8 @@
 (in-package :cl-clasp)
 
-; �ǥХå��Ѥ��ѿ�
-; eval-html-string �� nil �ˤ���� 
-; |#<-reader| �� who �����ؤ��Ѵ��򤷤ʤ�
+; デバッグ用の変数
+; eval-html-string を nil にすると 
+; |#<-reader| は who 形式への変換をしない
 (defparameter *eval-html-string* t)
 
 (defun atom-filter (fn lst)
@@ -31,8 +31,8 @@
     (nreverse acc)))
 
 
-; #< �ǤϤ��ޤ� ># �Ǥ���� html �� who �������Ѵ����롣
-; JavaScript �� ccs �� "  " ������Ȳ��ϤǤ��ʤ��Τ�����
+; #< ではじまり ># でおわる html を who 形式に変換する。
+; JavaScript や ccs の "  " をちゃんと解析できないので注意
 
 (defun |#<-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
@@ -45,34 +45,34 @@
       (setf one-char curr)
       ;(format t "~%pre-fetch-curr:<~a>~%" one-char)
 #|
-�������ܤǻ����ʤࡣ������֤� 'init
-�ǽ�Ū�� cond ���̲ᤷ�����
-one-char �������å����Ѥޤ�Ƥ���
-one-char �θ����ͤϺ��ɤ���ͤǤ��� curr �ˤʤ�
-one-char �� nil �ʤ�ʤˤ�Ĥޤ�ʤ�
+状態遷移で事が進む。初期状態は 'init
+最終的に cond を通過した後の
+one-char がスタックに積まれていく
+one-char の元の値は今読んだ値である curr になる
+one-char が nil ならなにもつまれない
 
-< ��ȯ�������� 'tag-fetch �ˤʤ롣one-char �� nil
-��������ʤ��ä��� 'reading
+< を発見したら 'tag-fetch になる。one-char は nil
+そうじゃなかったら 'reading
 
-'reading ���֤��� one-char �Ϥ��ΤޤޤʤΤ��Ѥޤ��
-�Х�ȯ�����ǽ�� 'reading ���֤˴٤�褦�ʤ�Τ� " ���Ĥޤ�ʤ���
+'reading 状態だと one-char はそのままなので積まれる
+バグ発見、最初に 'reading 状態に陥るようなものは " がつまれない。
 
-'tag-fetch �Ǥι�θ�� / �� space �Ȥ��Τۤ�
+'tag-fetch での考慮は / と space とそのほか
 
-/ �� >(right-k����Ϥ���) 'tag-end ��
-space �ϥ����åפ��� (<   pre �ʤɤ� < �� pre �δ֤Υ����åפι�θ)
-	tag ̾�Υ����åפ��ü�ʤΤ� 'tag-start-space-skip
-	(XML �λ��;�⤷�������� <  pre �Ȥ��Ϥ��ꤨ�ʤ����⤷��ʤ���
-	     ������礷�Ƥ���)
+/ は >(right-kを出力して) 'tag-end へ
+space はスキップする (<   pre などの < と pre の間のスキップの考慮)
+	tag 名のスキップは特殊なので 'tag-start-space-skip
+	(XML の仕様上もしかしたら <  pre とかはありえないかもしれないが
+	     こうりょしている)
 
-���Τۤ��ξ��� ̾������Ф��뤿��
+そのほかの場合は 名前を抽出するため
 	'tag-start-reading
 
-'tag-start-reading �Ǥ�
-	space ������Ф��Τۤ��θ�꡼�ӥ塼�Ȥ��ɤ� 'tag-reading
-	> �Ǥ����� 'init ����
+'tag-start-reading では
+	space があればそのほかの後リービューとを読む 'tag-reading
+	> でおわれば 'init 状態
 
-���⤬����Ⱦü������
+解説が中途半端だけど
 |#
       (cond ((eq status 'init)
              (cond ((char= one-char #\<)
@@ -176,7 +176,7 @@ space �ϥ����åפ��� (<   pre �ʤɤ� < �� pre �δ֤Υ����åפι�θ)
 	  #\# #\< #'|#<-reader|))
 
 ;----------------------------------------------------------------
-; ignore-space �ѤΥإ�ѡ�
+; ignore-space 用のヘルパー
 (defun atom-filter (fn lst)
   (let ((acc nil))
     (dolist (x lst)
@@ -193,19 +193,19 @@ space �ϥ����åפ��� (<   pre �ʤɤ� < �� pre �δ֤Υ����åפι�θ)
     string))
 
 ;----------------------------------------------------------------
-; |#<-reader| ��;�פ� "" (����ƥ�Ĥʤ��Υ��ȥ��)
-; ����������ΤǤ��������ؿ�
+; |#<-reader| が余計な "" (コンテンツなしのストリング)
+; を生成するのでそれを除去する関数
 
 (defun ignore-space (lst)
         (atom-filter #'only-space-string lst))
 
 ;----------------------------------------------------------------
 ;
-; ���ꤵ�줿 file-name ���Ǥ� html �� who �������Ѵ�
-; ����� <div> </div> ��Ĥ���褦�ˤ���
-; ��Ĺ�ʤ��Ȥ⤢��Τ�����
-; �ޤ������Υѡ������ϴ����ǤϤʤ�
-; �ä� pre ��ɾ����style �����Ȥ� java script �� " �������äƤ�����
+; 指定された file-name の素の html を who 形式に変換
+; 前後に <div> </div> をつけるようにした
+; 冗長なこともあるので注意
+; また、このパーサーは完全ではない
+; 特に pre の評価、style シートや java script に " が混ざっている場合
 ;
 (defun load-html-as-who (file-name)
   (let (html-str

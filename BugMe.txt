@@ -1,145 +1,145 @@
 --------------------------------------------
-fastcgi.lisp �ΥХ��ˤĤ���
-fastcgi.lisp �Ͻ��Ϥ���Ȥ���ʸ����������Ƥ��롣
-���ΤȤ��˺ǽ�Ū�� bytes ������ʸ����������Ƥ��롣
-clisp �Ǥ�(�����餯)����Ū��2byte�����ɤ򰷤äƤ��롣
-euc-jp ��Ȥ��ȴ��������ɤ�ʸ�������Τޤޡ����줬 clisp �λ��͡�
-�㤨��"��礦��"�� clisp �Ȥ��Ƥ�4ʸ����
-��������fastcgi.lisp ��bytes������8ʸ�����Ϥ򤷤褦�Ȥ��롣
-�ǽ�Ū�� C ���Ϥ�����Хåե���Ķ���ƽ��Ϥ򤷤褦�Ȥ��롣
+fastcgi.lisp のバグについて
+fastcgi.lisp は出力するときに文字数を数えている。
+そのときに最終的い bytes 換算で文字数を数えている。
+clisp では(おそらく)内部的に2byteコードを扱っている。
+euc-jp を使うと漢字コードは文字数そのまま。それが clisp の仕様。
+例えば"りょうす"は clisp としては4文字。
+しかし、fastcgi.lisp はbytes換算で8文字出力をしようとする。
+最終的に C に渡すためバッファを超えて出力をしようとする。
 
-������ fastcgi.lisp �Ǥ�����ʸ�����������褦�ˤ�����
-������ #+:clisp �Ȥ����������������⤷��ʤ���
-ʸ�������Ѥ���Ȥ��� euc-jp ���Ȼפäƿ�����褦�ˤ�����
-�ǽ� utf-8 �ˤ����顢ʸ�����������¿���ʤäƤ��ޤä���
-(�����礬�����ä�)
-�Ĥޤꡢ������ clisp �ʤ� utf-8 �� euc-jp ����Ƚ�Ǥ���
-�����Ȥ���ʸ����ʬ�ϽФ���ɬ�פ����롣
+そこで fastcgi.lisp でちゃんと文字数を数えるようにした。
+本当は #+:clisp とかした方がいいかもしれない。
+文字数を変えるときに euc-jp だと思って数えるようにした。
+最初 utf-8 にしたら、文字数がさらに多くなってしまった。
+(不整合が起こった)
+つまり、本当は clisp なら utf-8 か euc-jp かを判断して
+ちゃんとした文字数分創出する必要がある。
 
-���ޤ� clisp �Ȥ���Ƚ�Ǥ⤻����euc-jp �Ǥ���Ȼפä�
-���Ϥ���褦�ˤ�����
+いまは clisp という判断もせず、euc-jp であると思って
+出力するようにした。
 
-/usr/port/lisp �� 
+/usr/port/lisp に 
 sudo make
-�� make ����
-���Τ���fastcgi.lisp �򥳥ԡ���
+で make し、
+そのご、fastcgi.lisp をコピーし
 sudo make install 
-����� full ���Ǥ��롣�ʤ��� /usr/port �ΤФ��äݤ� full ��
-���ԡ�����ʤ��ΤǼ�ư�� full �򥳥ԡ����롣
+すると full ができる。なぜか /usr/port のばぐっぽく full が
+コピーされないので手動で full をコピーする。
 --------------------------------------------
 page-property-list
-�������ܿޤ�ꥹ�Ȳ����Ƥ���
+状態遷移図をリスト化している
 
-(:����̾ �ǽ��Ÿ������html html�Υꥹ�� Ŭ�Ѵؿ��Υꥹ��)
+(:状態名 最初に展開するhtml htmlのリスト 適用関数のリスト)
 
-"�ǽ��Ÿ������html"���� "html�Υꥹ��"�����äƤʤ���Фʤ�ʤ�
+"最初に展開するhtml"　は "htmlのリスト"に入ってなければならない
 
-html�Υꥹ�Ȥ�
-	(����̾ who�����Υꥹ��)
-�� '(main-page "hello world")
-�� '(main-page (:h2 "�ɤ��Ǥ��礦?"))
+htmlのリストは
+	(キー名 who形式のリスト)
+例 '(main-page "hello world")
+例 '(main-page (:h2 "どうでしょう?"))
 
-���뤤��
-	(����̾ file: �ƥ�ץ졼�ȥե�����̾)
+あるいは
+	(キー名 file: テンプレートファイル名)
 
-�ƥ�ץ졼�ȥե������ who �����ˤʤäƤ���ɬ�פ����롣
+テンプレートファイルは who 形式になっている必要がある。
 
-Ŭ�Ѵؿ��ϴ���Ū��Ʊ�������Ǽ��η���Ȥ롣
-������ hash-table ��Ȥ� ����ͤ� (���� �Х��) �η�
-����ͤ��㡧 '((status :init))
+適用関数は基本的に同じ形式で次の形をとる。
+引数に hash-table をとり 戻り値は (キー バリュ) の形
+戻り値の例： '((status :init))
 
-(�ǽ��Ŭ�Ѥ���ؿ� ���줾���Ŭ�Ѥ���ؿ� �Ǹ��Ŭ�Ѥ���ؿ�)
+(最初に適用する関数 それぞれに適用する関数 最後に適用する関数)
 
-hash-table �� cgi �Υѥ�᡼�����鼫ưŪ�˺���롣
-�㤨�� status=init&a="text"&b="1234" �Ȥ���� 
-'((status :init) (a "text") (b "1234")) �ȥꥹ�Ȳ����졢
-����ˤ��줬 hash-table �Ȥʤ롣�Х�塼�� status ��Τ���
-ʸ����ˤʤ롣�����ݤ��Ƥ�����ˤϤʤ�ʤ����Ȥ����ա�
-status ���������̤˥���ܥ�Ȥʤ롣
+hash-table は cgi のパラメータから自動的に作られる。
+例えば status=init&a="text"&b="1234" とあれば 
+'((status :init) (a "text") (b "1234")) とリスト化され、
+さらにこれが hash-table となる。バリューは status をのぞき
+文字列になる。数字ぽくても数字にはならないことに注意。
+status だけは特別にシンボルとなる。
 
-�ǽ�� cgi �� hidden �� status ������Ƥ����С�ɾ�������
-����ܥ�ˤʤ롣�⤷��status ���ʤ���� :init ����ưŪ�����ꤵ��롣
+最初の cgi に hidden で status を入れておけば、評価されて
+シンボルになる。もし、status がなければ :init が自動的に設定される。
 
-�����ǡ�status ���б�����ǽ��Ŭ�Ѥ���ؿ���Ŭ�Ѥ��졢
-�Ĥޤꡢ�ѥ�᡼������ hash-table �ˤʤä���Τ�ɾ�����ơ�
-�ꥹ�Ȥ��֤���
-���κǽ�δؿ��塢������ hash-table �ϥꥹ�Ȥη�̤�ȿ�Ǥ��ƹ�������롣
+そこで、status に対応する最初に適用する関数が適用され、
+つまり、パラメータから hash-table になったものを評価して、
+リストを返す。
+その最初の関数後、すぐに hash-table はリストの結果を反映して更新される。
 
-����2���ܤδؿ�������İ��Ŭ�Ѥ���롣����� form �γƥ����ƥ�Υ����å���
-�����ꤷ�Ƥ��롣�ؿ����¹Ԥ���Ƥ� hash-table �ˤϤ����ˤ�ȿ�Ǥ���ʤ���
-���٤Ƥδؿ����¹Ԥ��줿�Τ��� hash-table ��ȿ�Ǥ���롣
+次に2番目の関数群が一つ一つ適用される。これは form の各アイテムのチェック用
+を想定している。関数が実行されても hash-table にはすぐには反映されない。
+すべての関数が実行されたのちに hash-table に反映される。
 
-�����ơ��Ǹ�δؿ����¹Ԥ��졢���η�̤� hash-table ��ȿ�Ǥ���롣
-�������ơ��¹Ԥ��줿��̡��̾�Ǹ�δؿ��� status �ι�����
-�ʤ�餫�Υ��������(�᡼�������ʤɡˤ�����롣
+そして、最後の関数が実行され、その結果が hash-table に反映される。
+そうして、実行された結果、通常、最後の関数で status の更新と
+なんらかのアクション(メールを送るなど）がされる。
 
-����������줿���ơ��������鼡�Τ褦�� page-property ��Ȥ�
+新しく得られたステータスから次のように page-property をとる
   (setf page-property (asp:get-page-property status page-property-list))
 
-page-property �Ͻ���ͤ��ȡ��ǽ�˾���̾�Υ�����ɡ�
-���˺ǽ��Ÿ������ html ������ html �Υꥹ�ȤȤʤ롣
+page-property は初期値だと、最初に状態名のキーワード、
+次に最初に展開する html そして html のリストとなる。
 
-(:����̾ �ǽ��Ÿ������html html�Υꥹ�� Ŭ�Ѵؿ��Υꥹ��)
+(:状態名 最初に展開するhtml htmlのリスト 適用関数のリスト)
 
-����ͤǤϺǽ��Ÿ����html �Ϥ��ΤޤޤʤΤǡ�
+初期値では最初に展開すhtml はそのままなので、
     (asp:convert-page-property page-property)
-��Ÿ�����Ƥ�롣����ȡ�html �Υꥹ�Ȥ˽��ä�Ÿ�����뤳�Ȥˤʤ롣
-��ñ�����
+で展開してやる。すると、html のリストに従って展開することになる。
+簡単な例は
       '(:simple main-page 
 		((main-page (:h2 "hello")))
 		(nil nil nil))
 
-Ÿ��������
+展開されると
 	'(:simple (:h2 "hello") 
 			  ....)
-�Ȥʤ롣
-html�Υꥹ�Ȥ�
+となる。
+htmlのリストに
 	(main-page (:h2 sub))
 	(sub "sub")
-�Ƚ񤤤Ƥ���С�sub ��Ÿ�����졢�ǽ�Ū��
+と書いてあれば、sub が展開され、最終的に
 	(:h2 "sub")
-���Ǥ������롣
+ができあがる。
 	(main-page (:div (:h2 sub) (:h3 g-value)))
 	(sub "sub")
-�Ȥʤ��
-�����ˤ� g-value ���ʤ����ΤǤ��λ�����
-�쥭�������Ÿ���򤹤롣
+となると
+ここには g-value がない。のでその時点の
+レキシカルな展開をする。
 
 
-asp:convert-page-property ��Ÿ������Ƥۤ����ʤ���Τ�
+asp:convert-page-property で展開されてほしくないものは
 (:lisp-symbol message)
-�Ȥ��롣��������ȡ�asp:convert-page-property �Ǥ�Ÿ�����줺��
-message ���Ĥ롣
-����Ÿ�����줿��Τ�����Ÿ�����ʤ��褦�� cgi �ǽ񤯤��Ȥˤ�ä�
-���� make-content ��ưŪ�� html ���������뤳�Ȥ��Ǥ���
+とする。そうすると、asp:convert-page-property では展開されずに
+message が残る。
+一度展開されたものは二度展開しないように cgi で書くことによって
+次の make-content で動的に html を生成することができる
 
 (setf content (asp:make-content (cadr page-property) query-hash-table))
 
-make-content ��( Ÿ�����줿 )who �����Υꥹ�Ȥ�
-htable(�����Υ��ơ������δؿ����¹Ԥ��줿�Τ��� query-string ��) ��Ĥ���
-�����Ÿ�����롣
-�Ĥޤ� cgi �� form �ˤ���Ф����Ĥ�����
-�ޤ��������Υ��ơ������ؿ�����������Ф����Ĥ�����
-�ʤ���Х쥭���������(let �����ꤵ��Ƥ����ꡢ�������Х�����ꤵ��Ƥ������
-��Ĥ���
+make-content は( 展開された )who 形式のリストを
+htable(以前のステータスの関数が実行されたのちの query-string 群) をつかい
+さらに展開する。
+つまり cgi の form にあればそれをつかい、
+また、以前のステータス関数が生成すればそれをつかい、
+なければレキシカルな値(let で設定されていたり、グローバルに設定されていたり）
+をつかう
 
-�ǽ�Ū������줿 content ���֤��Ф褤��
+最終的に得られた content を返せばよい。
 
-who:str �ʤɤ�ɬ�פʾ��(�ɤ��������������˼���)��
+who:str などが必要な場合(どういう場合だ？次に示す)は
 (:lisp-symbol (who:str message))
-�ʤɤȤ���Ȥ褤��
+などとするとよい。
 
 	       (:textarea :name "message" :id "message"
 			  :rows "5" :cols "25"
 		       (:lisp-symbol (who:str message)))
-textarea �ϺǸ�� "string" ��ɬ�פ�������������
+textarea は最後に "string" が必要こういうケース
 (:div :class "field"
-	       (:label :class "field-name" "��̾:")
+	       (:label :class "field-name" "氏名:")
 	       (:div (:lisp-symbol (who:str sender-fullname))))
-div �⤽��������� html Ū�ˤ� <textarea> ���Ȥ�� </textarea>
-�Ȥ� <div> ���Ȥ�� </div> �Τ褦�ʥ�������
+div もそう。これは html 的には <textarea> すとりんぐ </textarea>
+とか <div> すとりんぐ </div> のようなケース。
 (:input :type "text" :id "sender-e-mail"
 		       :name "sender-e-mail" :size "40"
 		       :value (:lisp-symbol sender-e-mail))
 
-�Τ褦�� :value �����������ɬ�פʤ���
+のように :value に埋め込む場合は必要ない。

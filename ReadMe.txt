@@ -1,3 +1,3 @@
 cl-clasp
-	cl-who ��Ĥ��ä� HTML �����ѥå�����
+	cl-who をつかった HTML 作成パッケージ
 
