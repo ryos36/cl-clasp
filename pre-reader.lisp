@@ -124,8 +124,6 @@
 				  (push #\o output)
 				  (push #\t output)
 				  (push #\; output)))
-	      ((and (= 0 count) (char= #\# curr)) 
-				  (setf check-second t))
 	      (check-second (progn
 				(setf check-second nil)
 				(if (char= second-char curr)
@@ -136,6 +134,8 @@
 				  (progn 
 					  (push #\# output)
 					  (push curr output)))))
+	      ((and (= 0 count) (char= #\# curr)) 
+				  (setf check-second t))
 	      (t (push curr output)))
 
 	(if (not (char= #\# curr))
