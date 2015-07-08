@@ -52,13 +52,23 @@
 ;
 ; pre-line-n はしてほしいときとしてほしくない時がある
 ; pre-line-n は実質的に没
-(defparameter *pre-line-n* 1001)
+(defparameter *pre-line-n* 256)
 
 ;;----------------------------------------------------------------
-; who から
 ; (pre 
 ; #>PTEXT
 ; PTEXT)
+;
+; 当初はそうしてたけどカッコがめんどくさいので
+; #>PTEXT :PRE 
+; PTEXT 
+; に変えた
+;
+; who 内で
+; #>PTEXT :PRE 
+; text
+; PTEXT 
+;
 ; 等のようにして使うように設計されている
 ; 先頭の # で lisp 式を書くことができる
 
@@ -67,9 +77,33 @@
     (in-str (coerce chars 'string))
     (read in-str)))
 
+(defun pattern-split (r-char-lst &optional curr lst)
+  (if (null r-char-lst) (cons curr lst)
+    (let ((top-char (car r-char-lst)))
+      (if (char= top-char #\:)
+        (pattern-split (cdr r-char-lst) nil (cons curr lst))
+        (pattern-split (cdr r-char-lst) (push top-char curr) lst)))))
+
+(defun html-escape (r-char-list pre-line-n n &optional result)
+  (if (null r-char-list) result
+    (let ((top (car r-char-list))
+          (remain (cdr r-char-list)))
+      (case top
+        (:newline
+          (html-escape remain pre-line-n pre-line-n
+                       (cons #\newline
+                             (nconc
+                               (make-list (- pre-line-n n) :initial-element #\space)
+                               result))))
+        (#\newline
+          (html-escape remain pre-line-n pre-line-n
+                       (cons #\newline result)))
+        (t (html-escape remain pre-line-n (- n 1) (cons top result)))))))
+
 (defun |#>-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
-  (let (chars alist pattern (count 0) (second-char #\#) pre-mode)
+  (let (chars alist pattern (count 0) (second-char #\#) pre-mode
+              (pre-line-n *pre-line-n*))
     (do ((curr (read-char stream)
 	       (read-char stream)))
       ((char= #\newline curr))
@@ -77,13 +111,20 @@
 	(progn 
 	  (if pattern
 	    (push (to-symbol (nreverse chars)) alist)
-	    (setf pattern (nreverse chars)))
+	    (setf pattern chars))
 	  (setf chars nil))
 	(push curr chars)))
 
     (if pattern
       (push (to-symbol (nreverse chars)) alist)
-      (setf pattern (nreverse chars)))
+      (setf pattern chars))
+
+    ; alist に pattern 以降のリストが入る
+    ; #>PTEXT :P :style "nantoka"
+    ; alist は ("nantoka" :style :P)
+    ; pattern は (T X E T P)
+    ; どうせ後でひっくり返すので
+    ; pattern は逆のまま
 
     (setf pre-mode (and alist (eq :pre (car (last alist)))))
     ;(princ `(,(last alist) ,pre-mode))
@@ -94,10 +135,23 @@
     ; second-char は lisp にエスケープするときに有効
     ; したがって、このばあい #% で始まる場合のみ lisp 式とする
     ; デフォルトでは ## である。
+    #|
     (let ((len (length pattern)))
       (if (char= #\: (elt pattern (- len 2)))
 	(setf second-char (elt pattern (- len 1))
 	      pattern (subseq pattern 0 (- (length pattern ) 2)))))
+    |#
+
+    (let ((pattern-list (pattern-split pattern)))
+      (setf pattern (car pattern-list))
+      (let ((second-char-pattern (cadr pattern-list))
+            (pre-line-n-pattern (caddr pattern-list)))
+        (if second-char-pattern
+          (setf second-char (car second-char-pattern)))
+        (if pre-line-n-pattern
+          (setf pre-line-n (to-symbol (concatenate 'string pre-line-n-pattern))))))
+
+    ;(princ `(,pattern ,second-char ,pre-line-n))
 
     (let ((pointer pattern) output check-second)
       (do ((curr (read-char stream)
@@ -154,10 +208,10 @@
 
     (if (char= #\newline curr)
       (setf count 0)
-      ; count に達したら折り返す
-      (when (= count *pre-line-n*)
+      ; count に達したら折り返す :newline マーカーを入れる
+      (when (= count pre-line-n)
         (setf count 0)
-        (push #\newline output)))
+        (push :newline output)))
 
 	(setf pointer
 	      (if (char= (car pointer) curr)
@@ -166,9 +220,10 @@
 	(if (null pointer)
 	  (return)))
       (let ((last-string
-	     (coerce (nreverse
-		       (nthcdr (length pattern) output))
-		     'string)))
+	     (coerce (html-escape 
+                   (nthcdr (length pattern) output) 
+                   pre-line-n pre-line-n) 'string)))
+
 	(if alist (list 'quote (nreverse (push last-string alist)))
 	  last-string)))))
 
