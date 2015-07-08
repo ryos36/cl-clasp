@@ -45,12 +45,14 @@
 ;;----------------------------------------------------------------
 ; #>-reader の折り返し行
 ; 0 を設定すると無視する、、、と思う
-
-(defparameter *pre-line-n* 80)
-
+;
 ; PRE の時は上の pre-line-n で折り返してほしい
 ; しかし、P の時は newline をいれると IE が余計な空白を入れるので
 ; newline を push しないようにする。
+;
+; pre-line-n はしてほしいときとしてほしくない時がある
+; pre-line-n は実質的に没
+(defparameter *pre-line-n* 1001)
 
 ;;----------------------------------------------------------------
 ; who から
@@ -83,7 +85,8 @@
       (push (to-symbol (nreverse chars)) alist)
       (setf pattern (nreverse chars)))
 
-    (setf pre-mode (and alist (eq :pre (last alist))))
+    (setf pre-mode (and alist (eq :pre (car (last alist)))))
+    ;(princ `(,(last alist) ,pre-mode))
 
     ; #>PTEXT:% のように最後から２番目の文字が : の場合
     ; pattern を PTEXT にしたうえで second-char を最後の文字
