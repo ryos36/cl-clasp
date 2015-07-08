@@ -146,16 +146,15 @@
                   (if pre-mode (push curr output)))
 	      (t (push curr output)))
 
-	(if (not (char= #\# curr))
+	(if (and pre-mode (not (char= #\# curr)))
 	  (incf count))
 
-    (if pre-mode
-      (if (char= #\newline curr)
+    (if (char= #\newline curr)
+      (setf count 0)
+      ; count に達したら折り返す
+      (when (= count *pre-line-n*)
         (setf count 0)
-        ; count に達したら折り返す
-        (when (= count *pre-line-n*)
-          (setf count 0)
-          (push #\newline output))))
+        (push #\newline output)))
 
 	(setf pointer
 	      (if (char= (car pointer) curr)
