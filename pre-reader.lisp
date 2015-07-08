@@ -48,6 +48,10 @@
 
 (defparameter *pre-line-n* 80)
 
+; PRE の時は上の pre-line-n で折り返してほしい
+; しかし、P の時は newline をいれると IE が余計な空白を入れるので
+; newline を push しないようにする。
+
 ;;----------------------------------------------------------------
 ; who から
 ; (pre 
@@ -63,7 +67,7 @@
 
 (defun |#>-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
-  (let (chars alist pattern (count 0) (second-char #\#))
+  (let (chars alist pattern (count 0) (second-char #\#) pre-mode)
     (do ((curr (read-char stream)
 	       (read-char stream)))
       ((char= #\newline curr))
@@ -78,6 +82,8 @@
     (if pattern
       (push (to-symbol (nreverse chars)) alist)
       (setf pattern (nreverse chars)))
+
+    (setf pre-mode (and alist (eq :pre (last alist))))
 
     ; #>PTEXT:% のように最後から２番目の文字が : の場合
     ; pattern を PTEXT にしたうえで second-char を最後の文字
@@ -136,17 +142,20 @@
 					  (push curr output)))))
 	      ((and (= 0 count) (char= #\# curr)) 
 				  (setf check-second t))
+          ((char= #\newline curr)
+                  (if pre-mode (push curr output)))
 	      (t (push curr output)))
 
 	(if (not (char= #\# curr))
 	  (incf count))
 
-	(if (char= #\newline curr)
-	  (setf count 0)
-	  ; count に達したら折り返す
-	  (when (= count *pre-line-n*)
-	    (setf count 0)
-	    (push #\newline output)))
+    (if pre-mode
+      (if (char= #\newline curr)
+        (setf count 0)
+        ; count に達したら折り返す
+        (when (= count *pre-line-n*)
+          (setf count 0)
+          (push #\newline output))))
 
 	(setf pointer
 	      (if (char= (car pointer) curr)
