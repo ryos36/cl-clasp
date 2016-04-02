@@ -3,7 +3,7 @@
 (in-package :cl-user)
 
 (defpackage :cl-clasp
-  (:use :cl :cl-who :cl-ppcre :fastcgi)
+  (:use :cl :cl-who :cl-ppcre)
   (:nicknames :clasp :asp)
   (:export 
     :*html-data-dir*
