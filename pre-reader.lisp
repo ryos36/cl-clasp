@@ -30,7 +30,7 @@
 ; しかし、dir0/dir1/file.who は初期段階で展開され、どこから展開されたかを
 ; この load-text-file に教えることは難しい
 
-(defun load-text-file (file-name)
+(defun load-text-file (file-name &optional (use-escape-html t))
   (with-open-stream (stream (open (merge-pathnames (concatenate 'string *html-data-dir* file-name)) :direction :input))
     (let (rv)
       (do ((line (read-line stream)
@@ -40,7 +40,9 @@
 	      (concatenate 'string (if (null rv) "" rv)
 			   (string #\newline)
 			   line)))
-      (escape-html-char rv))))
+      (if use-escape-html
+        (escape-html-char rv)
+        rv))))
 
 ;;----------------------------------------------------------------
 ; #>-reader の折り返し行
