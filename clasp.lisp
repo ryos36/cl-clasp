@@ -168,13 +168,13 @@
   そのとき args を環境として使う。
   環境をともなった評価を入れ子にできないので協力ではない
   例えば
-  (let ((gege "xyz"))
-      (format t "~s~%"
-	      (asp:make-content '(:div (who:fmt gege)) '((xgege "xabc")))))
+  (let ((gege \"xyz\"))
+      (format t \"~s~%\"
+	      (asp:make-content '(:div (who:fmt gege)) '((xgege \"xabc\")))))
   これは gege を展開できない。
-  (setf gege "xyz")
-  (format t "~s~%"
-	  (asp:make-content '(:div (who:fmt gege)) '((xgege "xabc"))))
+  (setf gege \"xyz\")
+  (format t \"~s~%\"
+	  (asp:make-content '(:div (who:fmt gege)) '((xgege \"xabc\"))))
   なら大丈夫
 
   (:h2 lisp-symbol)

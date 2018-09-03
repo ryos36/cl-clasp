@@ -155,11 +155,17 @@
 
     ;(princ `(,pattern ,second-char ,pre-line-n))
 
-    (let ((pointer pattern) output check-second)
+    (let ((pointer pattern) output check-second skip-backslash-escape)
       (do ((curr (read-char stream)
 		 (read-char stream)))
 	((null pointer))
-	(cond ((char= #\< curr) (progn
+	(cond ((char= #\\ curr)
+         (setf skip-backslash-escape t))
+        (skip-backslash-escape
+          (progn
+           (setf skip-backslash-escape nil)
+           (push curr output)))
+        ((char= #\< curr) (progn
 				  (push #\& output)
 				  (push #\l output)
 				  (push #\t output)
