@@ -31,6 +31,8 @@
     :load-html-as-who
     :ignore-space
 
+    :make-dependency
+
     :get-query-string
     :make-checker
     :encode-token

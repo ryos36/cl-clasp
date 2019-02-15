@@ -45,12 +45,21 @@
     (let ((len (length x))
 	  key value updated-value)
       (setf key nil)
-      (cond ((= len 2) (setf key (car x) value (cadr x)))
-	    ((= len 3) (cond ((eq (cadr x) :file) 
-			      (setf key (car x) value (load-template-file (caddr x))))
-			     ((eq (cadr x) :lib)
-			      (let ((props (load-template-file (caddr x))))
-				(prop-list-to-hash-table props h))))))
+      (cond ((= len 2) (setf key (car x) value 
+                             (let ((v (cadr x)))
+                                   (if (atom v) v
+                                     (if (keywordp (car v)) v
+                                       (eval v))))))
+            ((= len 3) (cond ((eq (cadr x) :file) 
+                              (setf key (car x) value (load-template-file (caddr x))))
+ 
+                             ((eq (cadr x) :load)
+                              (setf key (car x)
+                                    value (load (merge-pathnames (concatenate 'string *html-data-dir* (caddr x))))))
+
+                             ((eq (cadr x) :lib)
+                              (let ((props (load-template-file (caddr x))))
+                                (prop-list-to-hash-table props h))))))
 
       (setf updated-value
 	     (cond ((symbolp value) (eval value))
@@ -210,6 +219,46 @@
       #+:p-debug
       (format t ">>>~s<<<~%" eval-content3))
     (eval eval-content3)))
+
+;----------------------------------------------------------------
+; 暫定的に cl-fad ではなく clisp 用の ext:default-directory を使う
+; prop-list の最初は . で区切っていないが assoc は使える
+;
+;(card-contents (web-top-make-card-contents "top/card-contents.list"))
+; のような記述は積極的に関連すると考える
+; 
+(defun make-dependency (contents-props the-file-str)
+  (let* ((first-prop-item (car contents-props))
+         (contents-data-dir (cadr (assoc :contents-data-dir first-prop-item)))
+         (created-html-dir (cadr (cl-ppcre:split (namestring (ext:default-directory)) contents-data-dir)))
+         (the-prop (assoc the-file-str (cdr contents-props) :test #'string-equal))
+         (prop-list (caddr the-prop))
+         files)
+
+    ; (assert created-html-dir)
+    (labels ((find-string (str-list &optional result)
+               (if (null str-list) result
+                 (let ((first-obj (car str-list))
+                       (remain-obj (cdr str-list)))
+                   (if (atom first-obj)
+                     (if (stringp first-obj) (push first-obj result))
+                     (find-string first-obj result))
+                   (find-string remain-obj result)))))
+
+      (dolist (x prop-list)
+        (let ((len (length x))
+              (second-keyword (cadr x)))
+          (cond ((and (= len 2) 
+                      (not (atom second-keyword))
+                      (not (keywordp (caadr x))))
+                 (find-string second-keyword files)) ; second-keyword is list
+
+                ((and (= len 3)
+                      (find second-keyword '(:file :load)))
+
+                 (let ((afile (caddr x))) ; just rename
+                   (push afile files))))))
+      files)))
 
 ;----------------------------------------------------------------
 (defun get-page-property (status page-property-list)
