@@ -6,7 +6,7 @@
 (in-package :cl-clasp)
 
 (asdf:defsystem :cl-clasp
-  :version "1.07"
+  :version "1.8"
   :depends-on (:cl-who :cl-ppcre)
   :serial t
   :components

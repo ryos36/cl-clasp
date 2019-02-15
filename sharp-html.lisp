@@ -5,6 +5,9 @@
 ; |#<-reader| は who 形式への変換をしない
 (defparameter *eval-html-string* t)
 
+
+;----------------------------------------------------------------
+; ignore-space 用のヘルパー
 (defun atom-filter (fn lst)
   (let ((acc nil))
     (dolist (x lst)
@@ -14,13 +17,19 @@
         (push (atom-filter fn x) acc)))
     (nreverse acc)))
 
+;----------------------------------------------------------------
 (defun only-space-string (string)
   (if (not (and (stringp string)
                 (every #'(lambda (x) (char= #\space x)) string)))
     string))
 
+;----------------------------------------------------------------
+; |#<-reader| が余計な "" (コンテンツなしのストリング)
+; を生成するのでそれを除去する関数
+
 (defun ignore-space (lst)
         (atom-filter #'only-space-string lst))
+
 
 ;#Paul's filter
 (defun filter (fn lst)
@@ -36,7 +45,7 @@
 
 (defun |#<-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
-  (let ((left-k #\() (right-k #\)) (ryos #\r)
+  (let ((left-k #\() (right-k #\))
         chars (status 'init) pre-pre-char pre-char one-char)
     (do ((curr (read-char stream) pre-fetch-curr)
          (pre-fetch-curr (read-char stream) (read-char stream)))
@@ -174,30 +183,6 @@ space はスキップする (<   pre などの < と pre の間のスキップ�
 (defun use-sharp-<-macro ()
 	(set-dispatch-macro-character
 	  #\# #\< #'|#<-reader|))
-
-;----------------------------------------------------------------
-; ignore-space 用のヘルパー
-(defun atom-filter (fn lst)
-  (let ((acc nil))
-    (dolist (x lst)
-      (if (atom x)
-        (let ((val (funcall fn x)))
-          (if val (push val acc)))
-        (push (atom-filter fn x) acc)))
-    (nreverse acc)))
-
-;----------------------------------------------------------------
-(defun only-space-string (string)
-  (if (not (and (stringp string)
-                (every #'(lambda (x) (char= #\space x)) string)))
-    string))
-
-;----------------------------------------------------------------
-; |#<-reader| が余計な "" (コンテンツなしのストリング)
-; を生成するのでそれを除去する関数
-
-(defun ignore-space (lst)
-        (atom-filter #'only-space-string lst))
 
 ;----------------------------------------------------------------
 ;

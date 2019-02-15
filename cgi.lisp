@@ -312,6 +312,7 @@ Returns a new string.  Does not alter the encoded string."
 
 ;;----------------------------------------------------------------
 ; fastcgi に依存している
+#+:fastcgi
 (defun get-query-string ()
   (decode-token 
     (cond ((string-equal (fastcgi:getenv "REQUEST_METHOD") "POST")

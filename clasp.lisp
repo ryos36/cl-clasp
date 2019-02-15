@@ -221,6 +221,8 @@
     (eval eval-content3)))
 
 ;----------------------------------------------------------------
+; contents-props と the-file-str で示されるストリングから
+; 依存関係のリストを作る。
 ; 暫定的に cl-fad ではなく clisp 用の ext:default-directory を使う
 ; prop-list の最初は . で区切っていないが assoc は使える
 ;
