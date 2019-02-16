@@ -35,6 +35,15 @@
 |#
 
 ;;----------------------------------------------------------------
+(defun load-local-package (file-name)
+  (let ((new-package-name (string-upcase *html-local-dir*)))
+    (if (not (find-package new-package-name))
+      (make-package new-package-name))
+    (let ((*package* (find-package new-package-name)))
+      (use-package 'cl-clasp)
+      (load file-name))))
+
+;;----------------------------------------------------------------
 (defun prop-list-to-hash-table (prop-list &optional h)
   "prop-list の形式のものを hash-table に展開する。
    hash-table は指定されなかったら make する。
@@ -68,7 +77,7 @@
 
                      ((eq op-word :load)
                       (setf key key-word
-                            value (load (merge-pathnames (concatenate 'string *html-data-dir* file-name)))))
+                            value (load-local-package (merge-pathnames (concatenate 'string *html-data-dir* file-name)))))
 
                      ((eq op-word :lib)
                       (let ((props (load-template-file file-name)))
