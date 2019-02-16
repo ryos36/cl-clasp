@@ -7,6 +7,7 @@
   (:nicknames :clasp :asp)
   (:export 
     :*html-data-dir*
+    :*html-local-dir*
     :*prologue-flag*
     :eval-to-who 
     :prop-list-to-hash-table 
@@ -21,6 +22,8 @@
     :add-property
 
     :*pre-line-n*
+    :expand-file-name
+    :expand-load
     :load-text-file
     :escape-html-char
     :use-sharp->-macro

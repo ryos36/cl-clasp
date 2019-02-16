@@ -1,6 +1,7 @@
 (in-package :cl-clasp)
 
 ;;----------------------------------------------------------------
+(defparameter *html-local-dir* "")
 (defparameter *html-data-dir* "html-data/")
 (defparameter *prologue-flag* nil)
 
@@ -8,7 +9,6 @@
 ; props list の :file, :lib 展開用
 (defun load-template-file (file-name)
   "html-data-dir から指定されたテンプレートを読む"
-
   (with-open-file (in (merge-pathnames (concatenate 'string *html-data-dir* file-name)))
     (read in)))
 
@@ -57,7 +57,11 @@
             ((= len 3) 
              (let* ((key-word (car x))
                     (op-word (cadr x))
-                    (file-name (caddr x)))
+                    (file-name (caddr x))
+                    (*html-local-dir* 
+                      (multiple-value-bind (match regs)
+                        (cl-ppcre:scan-to-strings "(.*)/[^/]*$" file-name)
+                        (elt regs 0))))
                (cond ((eq op-word :file) 
                       (setf key key-word 
                             value (load-template-file file-name)))

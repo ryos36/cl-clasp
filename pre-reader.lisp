@@ -20,18 +20,30 @@
     "&apos;"))
 
 ;----------------------------------------------------------------
+(defun expand-file-name (file-name)
+  (if (char-equal (char file-name 0) #\/)
+    (merge-pathnames (concatenate 'string *html-data-dir* file-name))
+    (merge-pathnames (concatenate 'string *html-data-dir* *html-local-dir* "/" file-name))))
+
+;----------------------------------------------------------------
+(defun expand-load (file-name)
+  (load (expand-file-name file-name)))
+
+;----------------------------------------------------------------
 ; 各 who から呼ばれるように設計されている
 ; 例えば典型的なのは pre
 ; (:pre (load-text-file "test.txt"))
-; load-text-file は html-data-dir からのパスになる。
-; property を展開してしまった後に実行されるため
+; load-text-file は
+;       "/" で始まれば html-data-dir からのパスになる。
+;       それ以外は相対パス。
+; 相対パスの起点は
+; property を展開してしまった後に実行されるため :lib などで
+; 指定されたディレクトリを相対パスの起点としている
 ; property には確かに file: dir0/dir1/file.who などとあり、
-; その file.who から load-text-file された場合相対アドレスになってほしい
-; しかし、dir0/dir1/file.who は初期段階で展開され、どこから展開されたかを
-; この load-text-file に教えることは難しい
+; *html-local-dir* を参照している
 
 (defun load-text-file (file-name &optional (use-escape-html t))
-  (with-open-stream (stream (open (merge-pathnames (concatenate 'string *html-data-dir* file-name)) :direction :input))
+  (with-open-stream (stream (open (expand-file-name file-name) :direction :input))
     (let (rv)
       (do ((line (read-line stream)
 		 (read-line stream nil nil)))
