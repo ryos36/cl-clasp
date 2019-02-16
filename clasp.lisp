@@ -38,7 +38,11 @@
 (defun prop-list-to-hash-table (prop-list &optional h)
   "prop-list の形式のものを hash-table に展開する。
    hash-table は指定されなかったら make する。
-   prop-list についてはこの ReadMe.txt 説明を書く"
+   prop-list についてはこの ReadMe.txt 説明を書く
+   :load は load するだけでテーブルに登録しているが
+   #P で始まるパスが設定されるだけである。
+   defun などが書いてあることを期待している
+   "
 
   (if (null h) (setf h (make-hash-table)))
   (dolist (x prop-list)
@@ -50,16 +54,21 @@
                                    (if (atom v) v
                                      (if (keywordp (car v)) v
                                        (eval v))))))
-            ((= len 3) (cond ((eq (cadr x) :file) 
-                              (setf key (car x) value (load-template-file (caddr x))))
- 
-                             ((eq (cadr x) :load)
-                              (setf key (car x)
-                                    value (load (merge-pathnames (concatenate 'string *html-data-dir* (caddr x))))))
+            ((= len 3) 
+             (let* ((key-word (car x))
+                    (op-word (cadr x))
+                    (file-name (caddr x)))
+               (cond ((eq op-word :file) 
+                      (setf key key-word 
+                            value (load-template-file file-name)))
 
-                             ((eq (cadr x) :lib)
-                              (let ((props (load-template-file (caddr x))))
-                                (prop-list-to-hash-table props h))))))
+                     ((eq op-word :load)
+                      (setf key key-word
+                            value (load (merge-pathnames (concatenate 'string *html-data-dir* file-name)))))
+
+                     ((eq op-word :lib)
+                      (let ((props (load-template-file file-name)))
+                        (prop-list-to-hash-table props h)))))))
 
       (setf updated-value
 	     (cond ((symbolp value) (eval value))
