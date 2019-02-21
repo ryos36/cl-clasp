@@ -5,7 +5,7 @@
 (defpackage :cl-clasp
   (:use :cl)
   (:nicknames :clasp :asp)
-  (:export 
+  (:export
     :*html-data-dir*
     :*html-local-dir*
     :*prologue-flag*

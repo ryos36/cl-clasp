@@ -170,24 +170,24 @@
   #+:p-debug
   (format t "eval-to-who:~a~%" content)
   (cond ((keywordp content) content)
-	((symbolp content) (eval-to-who (eval-to-one-who content args) args))
-	((atom content) content)
-	(t (let ((top-one (car content)))
-	     #+:p-debug
-	     (format t "eval-to-who:top-one:~a ~a~%" top-one
-		     (eq top-one :lisp-symbol))
-	     (cond ((eq top-one :lisp-symbol)
-		    (cadr content))
-		   ((eq (symbol-package top-one) (symbol-package 'cl-who:str))
-		    content)
-		   ((and (symbolp top-one) (not (keywordp top-one)))
-		    (eval-to-who (eval-to-one-who content args) args))
-		   (t 
-		     (let ((acc nil))
-		       (dolist (x content)
-			 (let ((val (eval-to-who x args)))
-			   (if val (push val acc))))
-		       (nreverse acc))))))))
+        ((symbolp content) (eval-to-who (eval-to-one-who content args) args))
+        ((atom content) content)
+        (t (let ((top-one (car content)))
+             #+:p-debug
+             (format t "eval-to-who:top-one:~a ~a~%" top-one
+                     (eq top-one :lisp-symbol))
+             (cond ((eq top-one :lisp-symbol)
+                    (cadr content))
+                   ((eq (symbol-package top-one) (symbol-package 'cl-who:str))
+                    content)
+                   ((and (symbolp top-one) (not (keywordp top-one)))
+                    (eval-to-who (eval-to-one-who content args) args))
+                   (t
+                     (let ((acc nil))
+                       (dolist (x content)
+                         (let ((val (eval-to-who x args)))
+                           (if val (push val acc))))
+                       (nreverse acc))))))))
 
 ;make-content-string
 ;make-content-string2 などがあるけど、、、
@@ -297,11 +297,11 @@
 ; 静的に who から who 変換をし page-property に書き戻している。
 (defun nconvert-page-property (page-property)
   (let ((main-content (car page-property))
-	(let-list (asp:hash-table-to-let-list (asp:prop-list-to-hash-table (cadr page-property)))))
+        (let-list (asp:hash-table-to-let-list (asp:prop-list-to-hash-table (cadr page-property)))))
     #+:p-debug
     (format t "main-content:~s~%let-list:~s~%" main-content let-list)
-    (let ((converted-content 
-	    (asp:eval-to-who main-content let-list)))
+    (let ((converted-content
+            (asp:eval-to-who main-content let-list)))
       (setf (car page-property) converted-content)
       (setf (cadr page-property) nil)
       converted-content)))
