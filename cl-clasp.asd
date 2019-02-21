@@ -1,7 +1,7 @@
-;;; Sinby Corp. 2011, 2014-2015
+;;; Sinby Corp. 2011-2019
 
 (defpackage :cl-clasp
-  (:use :cl :cl-who :cl-ppcre))
+  (:use :cl))
 
 (in-package :cl-clasp)
 
