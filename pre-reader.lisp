@@ -1,5 +1,8 @@
 (in-package :cl-clasp)
 
+; |#>-reader| に抱けた対応するという中途半端さ
+(defparameter *html-escape-mode* t)
+
 ;----------------------------------------------------------------
 ; < と > と & を &lt; &gt; &amp; に変換する
 ; いくらなんでも効率悪いだろう。構造化もされていないし。
@@ -78,6 +81,12 @@
 ; PTEXT 
 ; に変えた
 ;
+; 将来的には
+; @pre
+; #>PTEXT
+; PTEXT 
+; にすればよい
+;
 ; who 内で
 ; #>PTEXT :PRE 
 ; text
@@ -116,7 +125,8 @@
 
 (defun |#>-reader| (stream sub-char numarg)
   (declare (ignore sub-char numarg))
-  (let (chars alist pattern (count 0) (second-char #\#) pre-mode
+  (let (chars alist pattern (count 0) (second-char #\#) pre-mode 
+              (not-escape-mode (not *html-escape-mode*))
               (pre-line-n *pre-line-n*))
     (do ((curr (read-char stream)
 	       (read-char stream)))
@@ -140,8 +150,16 @@
     ; どうせ後でひっくり返すので
     ; pattern は逆のまま
 
-    (setf pre-mode (and alist (eq :pre (car (last alist)))))
-    ;(princ `(,(last alist) ,pre-mode))
+    (let ((first-mode (car (last alist))))
+      ;(print `(:first-mode ,first-mode))
+      (case first-mode 
+        (:pre (setf pre-mode alist))
+        (:not-escape (setf 
+                       not-escape-mode t
+                       alist (nreverse (cdr (nreverse alist) ))))))
+                                 ;(setf (last alist) nil)
+    (if (eq (last alist) :not-escape) (setf not-escape t))
+    ;(princ `(:last ,(last alist) ,pre-mode))
 
     ; #>PTEXT:% のように最後から２番目の文字が : の場合
     ; pattern を PTEXT にしたうえで second-char を最後の文字
@@ -177,6 +195,8 @@
           (progn
            (setf skip-backslash-escape nil)
            (push curr output)))
+        (not-escape-mode
+          (push curr output))
         ((char= #\< curr) (progn
 				  (push #\& output)
 				  (push #\l output)

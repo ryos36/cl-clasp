@@ -5,6 +5,9 @@
 (defparameter *html-data-dir* "html-data/")
 (defparameter *prologue-flag* nil)
 
+(defparameter *config-txt-dir* "")
+(defparameter *config-txt-n* 0)
+
 ;;----------------------------------------------------------------
 ; props list の :file, :lib 展開用
 (defun load-template-file (file-name)

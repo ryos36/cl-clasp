@@ -8,6 +8,8 @@
   (:export
     :*html-data-dir*
     :*html-local-dir*
+    :*config-txt-dir*
+    :*config-txt-n*
     :*prologue-flag*
     :eval-to-who 
     :prop-list-to-hash-table 
@@ -21,6 +23,7 @@
     :make-content
     :add-property
 
+    :*html-escape-mode*
     :*pre-line-n*
     :expand-file-name
     :expand-load
