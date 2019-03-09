@@ -8,6 +8,7 @@
 (defparameter *config-txt-dir* "")
 (defparameter *config-txt-n* 0)
 
+(defparameter *special-package-name-aliases* nil)
 ;;----------------------------------------------------------------
 ; props list の :file, :lib 展開用
 (defun load-template-file (file-name)
@@ -38,13 +39,20 @@
 |#
 
 ;;----------------------------------------------------------------
+;; *special-package-name-aliases* にあるのは名前を変える。
 (defun load-local-package (file-name)
-  (let ((new-package-name (string-upcase *html-local-dir*)))
-    (if (not (find-package new-package-name))
-      (make-package new-package-name))
-    (let ((*package* (find-package new-package-name)))
-      (use-package 'cl-clasp)
-      (load file-name))))
+  (flet ((rename-by-aliases (name)
+           (let ((hit-alias (assoc name *special-package-name-aliases*)))
+             (if hit-alias (cdr hit-alias)
+               name))))
+
+    (let ((new-package-name (rename-by-aliases (intern (string-upcase *html-local-dir*) :keyword))))
+
+      (if (not (find-package new-package-name))
+        (make-package new-package-name))
+      (let ((*package* (find-package new-package-name)))
+        (use-package 'cl-clasp)
+        (load file-name)))))
 
 ;;----------------------------------------------------------------
 (defun prop-list-to-hash-table (prop-list &optional h)

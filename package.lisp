@@ -10,6 +10,7 @@
     :*html-local-dir*
     :*config-txt-dir*
     :*config-txt-n*
+    :*special-package-name-aliases*
     :*prologue-flag*
     :eval-to-who 
     :prop-list-to-hash-table 
