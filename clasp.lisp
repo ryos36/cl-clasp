@@ -8,6 +8,9 @@
 (defparameter *config-txt-dir* "")
 (defparameter *config-txt-n* 0)
 
+(defparameter *page-props-file* "page.props")
+(defparameter *page-local-gen-n* 0)
+
 (defparameter *special-package-name-aliases* nil)
 ;;----------------------------------------------------------------
 ; props list の :file, :lib 展開用
@@ -38,6 +41,68 @@
           template-rv))
 |#
 
+;----------------------------------------------------------------
+; *page-props-file* からプロパティを自動生成する
+; プロパティリストを返す
+; プロパティは 
+; features として show_config_txt_properties を有効にすると表示する。
+;
+; get-dir-list は #'member 使えばよい
+
+(defun page-props-file-to-one-props (ahome-dir path &optional opt-to-dir)
+  (let ((home-dir (string-trim "/" ahome-dir)))
+  (labels ((get-dir-list (path)
+             (if (or (null path) (string= home-dir (car path))) (cdr path)
+               (get-dir-list (cdr path))))
+           (concat-dir (lst delim delim2 filename)
+             (concatenate 'string 
+               (reduce #'(lambda (x y) (concatenate 'string x delim y)) lst)
+                delim2 filename)))
+
+    (let ((dir-list (get-dir-list (pathname-directory path)))
+          (file-name (file-namestring path)))
+      (let* ((to-dir (or opt-to-dir (car dir-list)))
+             (dir-name (concat-dir dir-list "/" "" ""))
+             (to-file-name (concat-dir (cdr dir-list) "/" "." "html"))
+             (to-path-name (concatenate 'string to-dir "/" to-file-name))
+             (local-props (with-open-file (in path) (read in))))
+
+        (push `(*page-local-gen-n* 0) local-props)
+
+        ;(print `(:local-props ,(assoc 'cl-clasp:*config-txt-dir* local-props) ,local-props))
+        ;(print `(:ahome-dir ,ahome-dir ,home-dir, dir-name))
+
+        (assert dir-name)
+        (let ((sym (gensym)))
+        `(,to-path-name ,sym
+                     ,(subst sym :layout
+                        (mapcar #'(lambda (alst)
+                           #+:show_config_txt_properties
+                           (print `(:alst ,alst))
+                           (if (>= (length alst) 3)
+                             (let ((key (cadr alst))
+                                   (fname (caddr alst)))
+                               (assert (or (eq key :load) (eq key :file) (eq key :lib)))
+                               (assert (stringp fname))
+                               (assert (> (length fname) 0))
+                               (setf (caddr alst)
+                                     (if (eq (char fname 0) #\/)
+                                        (subseq fname 1) (concatenate 'string dir-name "/" fname)))))
+                           alst ) local-props)))))))))
+
+
+;;----------------------------------------------------------------
+; 再帰的にディレクトリをおりて *page-props-file* からプロパティを自動生成する
+; プロパティリストのリストを返す
+(defun load-page-props-recursively (dir-name)
+  (flet ((get-page-props-file ()
+           (let ((rv)) (cl-fad:walk-directory (concatenate 'string *html-data-dir* dir-name) #'(lambda(f) (push f rv)) :test  #'(lambda (file) (string-equal (file-namestring file) *page-props-file*)) ) rv )))
+
+    ;(print `(:dir ,(concatenate 'string cl-clasp:*html-data-dir* dir-name)))
+    ;(print `(:get-config-txt ,(sort (get-config-txt) #'(lambda (a b) (string> (namestring a) (namestring b))))))
+    (let ((file-lst (get-page-props-file)))
+       (mapcar #'(lambda (afile)
+                   (page-props-file-to-one-props *html-data-dir* afile)) file-lst ))))
 ;;----------------------------------------------------------------
 ;; load-local-package と *special-package-name-aliases* 
 ;; deprecated にすべき。そもそも local package ではない。
@@ -50,12 +115,12 @@
              (cl-ppcre:scan-to-strings "(.*)/[^/]*$" file-name)
              (elt regs 0)))
          (package-name (intern (string-upcase (concatenate 'string "CL-CLASP/" *html-local-dir*) ) :keyword))
-         (path-name (merge-pathnames (concatenate 'string *html-data-dir* file-name))))
-      (make-package package-name :nicknames nickname)
-      (let ((*package* (find-package package-name)))
-        (use-package :cl)
-        (use-package :cl-clasp)
-        (load path-name))))
+         (path-name (merge-pathnames (concatenate 'string *html-data-dir* file-name)))
+         (my-package (unless (unless (find-package package-name) (find-package nickname)) (make-package package-name :nicknames nickname))))
+    (let ((*package* my-package))
+      (use-package :cl)
+      (use-package :cl-clasp)
+      (load path-name))))
 
 ;;----------------------------------------------------------------
 ;; *special-package-name-aliases* にあるのは名前を変える。
@@ -330,6 +395,9 @@
         (let-list (asp:hash-table-to-let-list (asp:prop-list-to-hash-table (cadr page-property)))))
     #+:p-debug
     (format t "main-content:~s~%let-list:~s~%" main-content let-list)
+    #+:p-debug
+    (print `(:let-list ,let-list))
+
     (let ((converted-content
             (asp:eval-to-who main-content let-list)))
       (setf (car page-property) converted-content)

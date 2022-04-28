@@ -1,4 +1,4 @@
-;;; Sinby Corp. 2011
+;;; Sinby Corp. 2011-2022
 
 (in-package :cl-user)
 
@@ -8,8 +8,11 @@
   (:export
     :*html-data-dir*
     :*html-local-dir*
+
     :*config-txt-dir*
     :*config-txt-n*
+
+    :*page-local-gen-n*
     :*special-package-name-aliases*
     :*prologue-flag*
     :eval-to-who 
@@ -37,6 +40,8 @@
     :|#<-reader|
     :load-html-as-who
     :ignore-space
+
+    :load-page-props-recursively
 
     :load-package
     :make-dependency
