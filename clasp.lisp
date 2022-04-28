@@ -39,6 +39,25 @@
 |#
 
 ;;----------------------------------------------------------------
+;; load-local-package と *special-package-name-aliases* 
+;; deprecated にすべき。そもそも local package ではない。
+;; common lisp のパッケージだが動的にこのアプリ用に作られたものだ
+;; load package for clasp
+;; 
+(defun load-package (file-name &optional nickname)
+  (let* ((*html-local-dir*
+           (multiple-value-bind (match regs)
+             (cl-ppcre:scan-to-strings "(.*)/[^/]*$" file-name)
+             (elt regs 0)))
+         (package-name (intern (string-upcase (concatenate 'string "CL-CLASP/" *html-local-dir*) ) :keyword))
+         (path-name (merge-pathnames (concatenate 'string *html-data-dir* file-name))))
+      (make-package package-name :nicknames nickname)
+      (let ((*package* (find-package package-name)))
+        (use-package :cl)
+        (use-package :cl-clasp)
+        (load path-name))))
+
+;;----------------------------------------------------------------
 ;; *special-package-name-aliases* にあるのは名前を変える。
 (defun load-local-package (file-name)
   (flet ((rename-by-aliases (name)

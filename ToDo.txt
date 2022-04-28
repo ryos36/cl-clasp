@@ -1,3 +1,16 @@
+ライブラリをちゃんと読み込んでいない=> たぶんできた
+
+config.txt -> config.props 
+に変更
+
+# >PTEXT :P :class "abc def"
+ダブルクオートにちゃんと対応していない
+
+依存関係を解析したい
+WARN ですぎ。
+ext -> clisp 依存
+cl-fad -> iolib に変えたほうがいいのかも
+
 0) #のばぐ
 #>PTEXT :P
 logiFMC-FPD-II は FPD-Link II のチャネルを

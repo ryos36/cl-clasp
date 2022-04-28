@@ -38,6 +38,7 @@
     :load-html-as-who
     :ignore-space
 
+    :load-package
     :make-dependency
 
     :get-query-string
