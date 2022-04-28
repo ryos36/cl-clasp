@@ -338,7 +338,6 @@
 ;----------------------------------------------------------------
 ; contents-props と the-file-str で示されるストリングから
 ; 依存関係のリストを作る。
-; 暫定的に cl-fad ではなく clisp 用の ext:default-directory を使う
 ; prop-list の最初は . で区切っていないが assoc は使える
 ;
 ;(card-contents (web-top-make-card-contents "top/card-contents.list"))
@@ -347,7 +346,7 @@
 (defun make-dependency (contents-props the-file-str)
   (let* ((first-prop-item (car contents-props))
          (contents-data-dir (cadr (assoc :contents-data-dir first-prop-item)))
-         (created-html-dir (cadr (cl-ppcre:split (namestring (ext:default-directory)) contents-data-dir)))
+         (created-html-dir (cadr (cl-ppcre:split (namestring (uiop:getcwd)) contents-data-dir)))
          (the-prop (assoc the-file-str (cdr contents-props) :test #'string-equal))
          (prop-list (caddr the-prop))
          files)

@@ -1,12 +1,8 @@
-ライブラリをちゃんと読み込んでいない=> たぶんできた
-
-config.txt -> config.props 
-に変更
 
 # >PTEXT :P :class "abc def"
 ダブルクオートにちゃんと対応していない
 
-依存関係を解析したい
+依存関係を解析したい-> make-dependency をつくってあった
 WARN ですぎ。
 ext -> clisp 依存
 cl-fad -> iolib に変えたほうがいいのかも

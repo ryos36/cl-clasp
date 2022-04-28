@@ -1,4 +1,4 @@
-;;; Sinby Corp. 2011-2019
+;;; Sinby Corp. 2011-2022
 
 (defpackage :cl-clasp
   (:use :cl))
@@ -6,8 +6,8 @@
 (in-package :cl-clasp)
 
 (asdf:defsystem :cl-clasp
-  :version "1.8"
-  :depends-on (:cl-who :cl-ppcre)
+  :version "1.9"
+  :depends-on (:cl-who :cl-ppcre :cl-fad :uiop)
   :serial t
   :components
    ((:file "package")
