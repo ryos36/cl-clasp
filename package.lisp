@@ -8,11 +8,9 @@
   (:export
     :*html-data-dir*
     :*html-local-dir*
-
-    :*config-txt-dir*
-    :*config-txt-n*
-
+    :*page-props-file*
     :*page-local-gen-n*
+    :*page-local-dir*
     :*special-package-name-aliases*
     :*prologue-flag*
     :eval-to-who 

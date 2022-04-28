@@ -5,11 +5,10 @@
 (defparameter *html-data-dir* "html-data/")
 (defparameter *prologue-flag* nil)
 
-(defparameter *config-txt-dir* "")
-(defparameter *config-txt-n* 0)
-
 (defparameter *page-props-file* "page.props")
 (defparameter *page-local-gen-n* 0)
+(defparameter *page-local-dir* nil)
+; ライブラリが page の local-dir を知る機構
 
 (defparameter *special-package-name-aliases* nil)
 ;;----------------------------------------------------------------
@@ -67,9 +66,8 @@
              (to-path-name (concatenate 'string to-dir "/" to-file-name))
              (local-props (with-open-file (in path) (read in))))
 
-        (push `(*page-local-gen-n* 0) local-props)
-
-        ;(print `(:local-props ,(assoc 'cl-clasp:*config-txt-dir* local-props) ,local-props))
+        (when (not (assoc 'cl-clasp:*page-local-dir* local-props))
+           (push `(cl-clasp:*page-local-dir* ,dir-name) local-props))
         ;(print `(:ahome-dir ,ahome-dir ,home-dir, dir-name))
 
         (assert dir-name)
