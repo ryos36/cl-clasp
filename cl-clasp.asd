@@ -6,8 +6,8 @@
 (in-package :cl-clasp)
 
 (asdf:defsystem :cl-clasp
-  :version "1.9"
-  :depends-on (:cl-who :cl-ppcre :cl-fad :uiop)
+  :version "1.9.1"
+  :depends-on (:cl-who :cl-ppcre :cl-fad :uiop :local-time)
   :serial t
   :components
    ((:file "package")

@@ -5,12 +5,20 @@
 (defparameter *html-data-dir* "html-data/")
 (defparameter *prologue-flag* nil)
 
+(defparameter *page-cover-file* "cover")
+(defparameter *page-image-ext* '("jpeg" "jpg" "png" "gif" "svg"))
+
 (defparameter *page-props-file* "page.props")
+
+; ライブラリが page の local-dir を知る機構
+(defparameter *this-page-props* nil)
+
+; 将来的にはいらないかも
 (defparameter *page-local-gen-n* 0)
 (defparameter *page-local-dir* nil)
-; ライブラリが page の local-dir を知る機構
 
 (defparameter *special-package-name-aliases* nil)
+
 ;;----------------------------------------------------------------
 ; props list の :file, :lib 展開用
 (defun load-template-file (file-name)
@@ -18,81 +26,116 @@
   (with-open-file (in (merge-pathnames (concatenate 'string *html-data-dir* file-name)))
     (read in)))
 
-#|
-古いバージョン
-名残雪的に置いてある
-(defun make-key-quote-value (one-prop)
-  "与えられた '(key value) から quote された値をとる"
-
-	(let ((key (car one-prop))
-	      (value (cadr one-prop)))
-	  (list key (list 'quote value))))
-
-(defun make-key-quote-value (one-prop)
-  "与えられた '(key value) から quote された値をとる。
-   キーワードにしたら必要なくなった関数"
-
-        (let ((key (car one-prop))
-              (value (cadr one-prop))
-              (template-rv (copy-list '(key 'value))))
-          (setf (car template-rv) key)
-          (setf (cadadr template-rv) value)
-          template-rv))
-|#
+;;----------------------------------------------------------------
+(defun is-asp-middle-keyword (key)
+  (or (eq key :load) (eq key :file) (eq key :lib) (eq key :data)))
 
 ;----------------------------------------------------------------
 ; *page-props-file* からプロパティを自動生成する
 ; プロパティリストを返す
 ; プロパティは 
-; features として show_config_txt_properties を有効にすると表示する。
+; features として show-page-properties を有効にすると表示する。
+;
+; プロパティリストに書かれていなくても自動的 image ファイルリストと 
+; cover イメージを生成する
 ;
 ; get-dir-list は #'member 使えばよい
 
 (defun page-props-file-to-one-props (ahome-dir path &optional opt-to-dir)
   (let ((home-dir (string-trim "/" ahome-dir)))
-  (labels ((get-dir-list (path)
-             (if (or (null path) (string= home-dir (car path))) (cdr path)
-               (get-dir-list (cdr path))))
-           (concat-dir (lst delim delim2 filename)
-             (concatenate 'string 
-               (reduce #'(lambda (x y) (concatenate 'string x delim y)) lst)
-                delim2 filename)))
+    (labels ((get-dir-list (path)
+               (if (or (null path) (string= home-dir (car path))) (cdr path)
+                 (get-dir-list (cdr path))))
+             (concat-dir (lst delim delim2 filename)
+               (concatenate 'string 
+                 (reduce #'(lambda (x y) (concatenate 'string x delim y)) lst)
+                  delim2 filename)))
+  
+      (let ((dir-list (get-dir-list (pathname-directory path)))
+            (file-name (file-namestring path))
+            (sym-local-dir (intern "LOCAL-DIR"))
+            (sym-date (intern "DATE"))
+            (sym-images (intern "IMAGES"))
+            (sym-list (intern "LIST"))
+            (sym-cover (intern "COVER"))
+            (sym-layout (intern "LAYOUT")))
+  
+        (let* ((to-dir (or opt-to-dir (car dir-list)))
+               (dir-name (concat-dir dir-list "/" "" ""))
+               (to-file-name (concat-dir (cdr dir-list) "/" "." "html"))
+               (to-path-name (concatenate 'string to-dir "/" to-file-name))
+               (local-props (with-open-file (in path) (read in))))
+  
+          ; insert *page-local-dir*
+          (unless (assoc 'cl-clasp:*page-local-dir* local-props)
+             (push `(cl-clasp:*page-local-dir* ,dir-name) local-props))
 
-    (let ((dir-list (get-dir-list (pathname-directory path)))
-          (file-name (file-namestring path)))
-      (let* ((to-dir (or opt-to-dir (car dir-list)))
-             (dir-name (concat-dir dir-list "/" "" ""))
-             (to-file-name (concat-dir (cdr dir-list) "/" "." "html"))
-             (to-path-name (concatenate 'string to-dir "/" to-file-name))
-             (local-props (with-open-file (in path) (read in))))
+          ; insert local-dir
+          (unless (assoc sym-local-dir local-props)
+            (push `(,sym-local-dir ,dir-name) local-props))
 
-        (when (not (assoc 'cl-clasp:*page-local-dir* local-props))
-           (push `(cl-clasp:*page-local-dir* ,dir-name) local-props))
-        ;(print `(:ahome-dir ,ahome-dir ,home-dir, dir-name))
+          ;(print `(:ahome-dir ,ahome-dir ,home-dir ,dir-name ,to-dir ,dir-list))
+          (assert dir-name)
+  
+          (flet ((make-semi-abs-pathname (file)
+                   (assert (or (stringp file) (pathnamep file)))
+                   (concatenate 'string dir-name "/" (file-namestring file))))
+  
+    
+            ; insert date as local-time format
+            (let* ((created-date-pair (assoc sym-date local-props))
+                   (created-date (cadr created-date-pair)))
+              (if created-date-pair
+                (let ((created-ltime 
+                        (funcall 
+                          (cond ((stringp created-date) #'local-time:parse-timestring)
+                                ((numberp created-date) #'local-time:universal-to-timestamp)
+                                (t #'(lambda(x) (error (format t "Fatal error date Format in clasp:~a~%" x))))) created-date)))
+                  (setf (cadr created-date-pair) created-ltime))
+                (push `(,sym-date ,(local-time:universal-to-timestamp (file-write-date path))) local-props)))
+    
+            ; 
+            #+:p-debug
+            (let ((*package* (find-package :common-lisp-user)))
+              (dolist (e local-props)
+                (print `(:lp ,(car e) ,(symbolp (car e))))))
 
-        (assert dir-name)
-        (let ((sym (gensym)))
-        `(,to-path-name ,sym
-                     ,(subst sym :layout
-                        (mapcar #'(lambda (alst)
-                           #+:show_config_txt_properties
-                           (print `(:alst ,alst))
-                           (if (>= (length alst) 3)
-                             (let ((key (cadr alst))
-                                   (fname (caddr alst)))
-                               (assert (or (eq key :load) (eq key :file) (eq key :lib)))
-                               (assert (stringp fname))
-                               (assert (> (length fname) 0))
-                               (setf (caddr alst)
-                                     (if (eq (char fname 0) #\/)
-                                        (subseq fname 1) (concatenate 'string dir-name "/" fname)))))
-                           alst ) local-props)))))))))
-
+            ; insert images and cover
+            (let (images cover)
+              (dolist (file (uiop:directory-files (concatenate 'string ahome-dir "/" dir-name)))
+                (let ((file-ext (string-downcase (pathname-type file))))
+                  ;(print `(:file ,file ,file-ext ,(find file-ext *page-image-ext* :test #'string=)))
+                  (when (find file-ext *page-image-ext* :test #'string=)
+                    (push (make-semi-abs-pathname file) images)
+                    (if (string= *page-cover-file* (string-downcase (pathname-name file)))
+                      (setf cover (make-semi-abs-pathname file))))))
+            
+              (if images (push `(,sym-images ,(cons :data images)) local-props))
+              (if cover (push `(,sym-cover ,cover) local-props)))
+            
+            ; converter semi-abs-pathname from file 
+            (let ((sym (gensym)))
+            `(,to-path-name ,sym
+                         ,(subst sym sym-layout
+                            (mapcar #'(lambda (alst)
+                               #+:show-page-properties
+                               (print `(:alst ,alst))
+                               (if (>= (length alst) 3)
+                                 (let ((key (cadr alst))
+                                       (fname (caddr alst)))
+                                   (assert (is-asp-middle-keyword key))
+                                   (assert (stringp fname))
+                                   (assert (> (length fname) 0))
+                                   (setf (caddr alst)
+                                         (if (eq (char fname 0) #\/)
+                                            (subseq fname 1) 
+                                            (make-semi-abs-pathname fname)))))
+                               alst ) local-props))))))))))
 
 ;;----------------------------------------------------------------
 ; 再帰的にディレクトリをおりて *page-props-file* からプロパティを自動生成する
 ; プロパティリストのリストを返す
-(defun load-page-props-recursively (dir-name)
+(defun load-page-props-recursively (dir-name &optional)
   (flet ((get-page-props-file ()
            (let ((rv)) (cl-fad:walk-directory (concatenate 'string *html-data-dir* dir-name) #'(lambda(f) (push f rv)) :test  #'(lambda (file) (string-equal (file-namestring file) *page-props-file*)) ) rv )))
 
@@ -174,7 +217,9 @@
 
                      ((eq op-word :lib)
                       (let ((props (load-template-file file-name)))
-                        (prop-list-to-hash-table props h)))))))
+                        (prop-list-to-hash-table props h)))
+
+                     ((eq op-word :data) file-name)))))
 
       (setf updated-value
 	     (cond ((symbolp value) (eval value))
@@ -350,8 +395,9 @@
          (the-prop (assoc the-file-str (cdr contents-props) :test #'string-equal))
          (prop-list (caddr the-prop))
          files)
+         ;(print `(:make-d ,(symbolp (caar first-prop-item)) ,first-prop-item ,created-html-dir ,contents-data-dir))
 
-    ; (assert created-html-dir)
+    ;(assert created-html-dir)
     (labels ((find-string (str-list &optional result)
                (if (null str-list) result
                  (let ((first-obj (car str-list))

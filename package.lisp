@@ -6,45 +6,48 @@
   (:use :cl)
   (:nicknames :clasp :asp)
   (:export
-    :*html-data-dir*
-    :*html-local-dir*
-    :*page-props-file*
-    :*page-local-gen-n*
-    :*page-local-dir*
-    :*special-package-name-aliases*
-    :*prologue-flag*
-    :eval-to-who 
-    :prop-list-to-hash-table 
-    :hash-table-to-let-list
-    :query-string-to-hash-table
-    :get-page-property
-    :page-property-is-already-converted
-    :nconvert-page-property
-    :merge-list-to-hash-table
-    :update-hash-table
-    :make-content
-    :add-property
+    #:*html-data-dir*
+    #:*html-local-dir*
+    #:*page-props-file*
 
-    :*html-escape-mode*
-    :*pre-line-n*
-    :expand-file-name
-    :expand-load
-    :load-text-file
-    :escape-html-char
-    :use-sharp->-macro
+    #:*this-page-props*
+    #:*page-local-gen-n*
+    #:*page-local-dir*
 
-    :*eval-html-string*
-    :use-sharp-<-macro
-    :|#<-reader|
-    :load-html-as-who
-    :ignore-space
+    #:*special-package-name-aliases*
+    #:*prologue-flag*
+    #:eval-to-who 
+    #:prop-list-to-hash-table 
+    #:hash-table-to-let-list
+    #:query-string-to-hash-table
+    #:get-page-property
+    #:page-property-is-already-converted
+    #:nconvert-page-property
+    #:merge-list-to-hash-table
+    #:update-hash-table
+    #:make-content
+    #:add-property
 
-    :load-page-props-recursively
+    #:*html-escape-mode*
+    #:*pre-line-n*
+    #:expand-file-name
+    #:expand-load
+    #:load-text-file
+    #:escape-html-char
+    #:use-sharp->-macro
 
-    :load-package
-    :make-dependency
+    #:*eval-html-string*
+    #:use-sharp-<-macro
+    #:|#<-reader|
+    #:load-html-as-who
+    #:ignore-space
 
-    :get-query-string
-    :make-checker
-    :encode-token
-    :decode-token))
+    #:load-page-props-recursively
+
+    #:load-package
+    #:make-dependency
+
+    #:get-query-string
+    #:make-checker
+    #:encode-token
+    #:decode-token))

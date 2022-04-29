@@ -1,3 +1,14 @@
+:cover :images :date 問題 -> intern で解決
+
+現在の local-props を知るようにしたほうが良い
+(defparameter *page-local-gen-n* 0)
+(defparameter *page-local-dir* nil)
+
+つまり
+(defparameter *this-page-props* nil)
+みたいなの
+
+HTML5 対応を確認
 
 # >PTEXT :P :class "abc def"
 ダブルクオートにちゃんと対応していない
