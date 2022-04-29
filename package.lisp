@@ -45,6 +45,7 @@
     #:load-page-props-recursively
     #:load-package
     #:get-summary
+    #:*page-delimiter-for-summary*
 
     #:make-dependency
 

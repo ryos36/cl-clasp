@@ -7,6 +7,7 @@
 
 (defparameter *page-cover-file* "cover")
 (defparameter *page-image-ext* '("jpeg" "jpg" "png" "gif" "svg"))
+(defparameter *page-delimiter-for-summary* "<!--more-->")
 
 (defparameter *page-props-file* "page.props")
 
@@ -41,7 +42,7 @@
 ;
 ; get-dir-list は #'member 使えばよい
 
-(defun page-props-file-to-one-props (ahome-dir path &optional opt-to-dir)
+(defun page-props-file-to-one-props (ahome-dir path with-summary &optional opt-to-dir)
   (let ((home-dir (string-trim "/" ahome-dir)))
     (labels ((get-dir-list (path)
                (if (or (null path) (string= home-dir (car path))) (cdr path)
@@ -51,6 +52,7 @@
                  (reduce #'(lambda (x y) (concatenate 'string x delim y)) lst)
                   delim2 filename)))
   
+      ; 毎回作っているのは冗長かも
       (let ((dir-list (get-dir-list (pathname-directory path)))
             (file-name (file-namestring path))
             (sym-local-dir (intern "LOCAL-DIR"))
@@ -58,6 +60,8 @@
             (sym-images (intern "IMAGES"))
             (sym-list (intern "LIST"))
             (sym-cover (intern "COVER"))
+            (sym-main-content (intern "MAIN-CONTENT"))
+            (sym-summary (intern "SUMMARY"))
             (sym-layout (intern "LAYOUT")))
   
         (let* ((to-dir (or opt-to-dir (car dir-list)))
@@ -112,6 +116,17 @@
             
               (if images (push `(,sym-images ,(cons :data images)) local-props))
               (if cover (push `(,sym-cover ,cover) local-props)))
+
+            ; create summary
+            (if (and with-summary (not (assoc sym-summary local-props)))
+              (let* ((main-content-info (assoc sym-main-content local-props))
+                     (check-info-key (assert (eq (cadr main-content-info) :file)))
+                     (main-content-file (caddr main-content-info))
+                     (main-content-lst (load-template-file (make-semi-abs-pathname main-content-file)))
+                     (summary-text (if main-content-lst (get-summary main-content-lst))))
+                ;(print `(:summary ,summary-text))
+                (if summary-text (push `(,sym-summary ,summary-text) local-props))))
+
             
             ; converter semi-abs-pathname from file 
             (let ((sym (gensym)))
@@ -135,7 +150,7 @@
 ;;----------------------------------------------------------------
 ; 再帰的にディレクトリをおりて *page-props-file* からプロパティを自動生成する
 ; プロパティリストのリストを返す
-(defun load-page-props-recursively (dir-name &optional)
+(defun load-page-props-recursively (dir-name &optional with-summary)
   (flet ((get-page-props-file ()
            (let ((rv)) (cl-fad:walk-directory (concatenate 'string *html-data-dir* dir-name) #'(lambda(f) (push f rv)) :test  #'(lambda (file) (string-equal (file-namestring file) *page-props-file*)) ) rv )))
 
@@ -143,7 +158,7 @@
     ;(print `(:get-config-txt ,(sort (get-config-txt) #'(lambda (a b) (string> (namestring a) (namestring b))))))
     (let ((file-lst (get-page-props-file)))
        (mapcar #'(lambda (afile)
-                   (page-props-file-to-one-props *html-data-dir* afile)) file-lst ))))
+                   (page-props-file-to-one-props *html-data-dir* afile with-summary)) file-lst ))))
 ;;----------------------------------------------------------------
 ;; load-local-package と *special-package-name-aliases* 
 ;; deprecated にすべき。そもそも local package ではない。
@@ -509,7 +524,7 @@
                    ;(print `(:one ,one ,my-remain ,result))
                    (if (stringp one)
                      (my-concatenate my-remain (push one result))
-                     (if (and (symbolp one) (string= (symbol-name one) "<!--MORE-->"))
+                     (if (and (symbolp one) (string= (symbol-name one) (string-upcase *page-delimiter-for-summary*)))
                          (my-concatenate nil result)
                          (my-concatenate my-remain (push (get-summary one) result))))))))
   

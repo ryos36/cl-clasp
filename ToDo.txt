@@ -16,8 +16,6 @@ HTML5 対応を確認
 
 依存関係を解析したい-> make-dependency をつくってあった
 WARN ですぎ。
-ext -> clisp 依存
-cl-fad -> iolib に変えたほうがいいのかも
 
 0) #のばぐ
 #>PTEXT :P
@@ -76,6 +74,9 @@ form で来てもいないのでなにもない。
 3) 評価したときにエラーになった時の処理
 	-> デバッグがしにくい
 	-> 呼び出す側で handler-case をつかってくれ
+
+4) まぁいいでしょう
+cl-fad -> iolib に変えたほうがいいのかも
 
 ----------- Bug
 sharp-html
