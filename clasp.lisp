@@ -492,3 +492,31 @@
       (update-hash-table0 hash-table post-func)	
       hash-table)))
 
+;;----------------------------------------------------------------
+(defun get-summary (who-lst)
+  (if (listp who-lst)
+    (labels ((last-id (lst)
+               (let ((last-id-remain (member-if #'keywordp lst)))
+                 (if last-id-remain
+                   (last-id (cddr last-id-remain))
+                   lst)))
+             (my-concatenate (lst &optional result)
+               ;(print `(:mc ,lst ,result ,(eval `(concatenate 'string ,@(reverse result)))))
+               (if (null lst)
+                 (eval `(concatenate 'string ,@(nreverse result)))
+                 (let ((one (car lst))
+                       (my-remain (cdr lst)))
+                   ;(print `(:one ,one ,my-remain ,result))
+                   (if (stringp one)
+                     (my-concatenate my-remain (push one result))
+                     (if (and (symbolp one) (string= (symbol-name one) "<!--MORE-->"))
+                         (my-concatenate nil result)
+                         (my-concatenate my-remain (push (get-summary one) result))))))))
+  
+      (let* ((cdr-who-lst (cdr who-lst))
+             (remain (last-id cdr-who-lst)))
+        ;(print `(:remain ,remain))
+        (if remain
+          (my-concatenate remain)
+          (eval `(concatenate 'string ,@cdr-who-lst)))))
+  ""))

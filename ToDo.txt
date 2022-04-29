@@ -1,4 +1,5 @@
 :cover :images :date 問題 -> intern で解決
+:data つくったけど使ってない
 
 現在の local-props を知るようにしたほうが良い
 (defparameter *page-local-gen-n* 0)

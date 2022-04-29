@@ -43,8 +43,9 @@
     #:ignore-space
 
     #:load-page-props-recursively
-
     #:load-package
+    #:get-summary
+
     #:make-dependency
 
     #:get-query-string
