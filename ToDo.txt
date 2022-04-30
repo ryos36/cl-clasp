@@ -1,21 +1,27 @@
+ディレクトリの書き方整理
+    / で始まるときは指定された content ディレクトリのトップから
+    それ以外は相対アドレス
+
 :cover :images :date 問題 -> intern で解決
 :data つくったけど使ってない
 
-現在の local-props を知るようにしたほうが良い
-(defparameter *page-local-gen-n* 0)
-(defparameter *page-local-dir* nil)
 
-つまり
-(defparameter *this-page-props* nil)
-みたいなの
+現在の local-props を知るようにしたほうが良い
+    (defparameter *page-local-gen-n* 0)
+    (defparameter *page-local-dir* nil)
+
+    つまり
+    (defparameter *this-page-props* nil)
+    みたいなの
 
 HTML5 対応を確認
+    prolog の問題
 
 # >PTEXT :P :class "abc def"
 ダブルクオートにちゃんと対応していない
 
 依存関係を解析したい-> make-dependency をつくってあった
-WARN ですぎ。
+clisp で WARN ですぎ。
 
 0) #のばぐ
 #>PTEXT :P
