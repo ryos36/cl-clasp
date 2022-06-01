@@ -14,4 +14,5 @@
     (:file "clasp")
     (:file "sharp-html")
     (:file "pre-reader")
+	#+:clisp
     (:file "cgi")))

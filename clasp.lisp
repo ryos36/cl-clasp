@@ -3,7 +3,7 @@
 ;;----------------------------------------------------------------
 (defparameter *html-local-dir* "")
 (defparameter *html-data-dir* "html-data/")
-(defparameter *prologue-flag* nil)
+(defparameter *prologue-flag* t)
 
 (defparameter *page-cover-file* "cover")
 (defparameter *page-image-ext* '("jpeg" "jpg" "png" "gif" "svg"))
@@ -172,7 +172,7 @@
              (elt regs 0)))
          (package-name (intern (string-upcase (concatenate 'string "CL-CLASP/" *html-local-dir*) ) :keyword))
          (path-name (merge-pathnames (concatenate 'string *html-data-dir* file-name)))
-         (my-package (unless (unless (find-package package-name) (find-package nickname)) (make-package package-name :nicknames nickname))))
+         (my-package (unless (unless (find-package package-name) (find-package nickname)) (make-package package-name :nicknames (list nickname)))))
     (let ((*package* my-package))
       (use-package :cl)
       (use-package :cl-clasp)
@@ -378,7 +378,7 @@
 	 (eval-content0
 	   (append '(let) (list new-args)))
 	 (eval-content1
-	   (append `(who:with-html-output (out nil :prologue ,*prologue-flag*)) (list content)))
+	   (append `(who:with-html-output (out nil :prologue "<!DOCTYPE html>")) (list content)))
 	 (eval-content2
 	   (append '(with-output-to-string (out)) (list eval-content1)))
 	 (eval-content3
