@@ -54,11 +54,11 @@
   
       ; 毎回作っているのは冗長かも
       (let ((dir-list (get-dir-list (pathname-directory path)))
-            (file-name (file-namestring path))
+            ;(file-name (file-namestring path))
             (sym-local-dir (intern "LOCAL-DIR"))
             (sym-date (intern "DATE"))
             (sym-images (intern "IMAGES"))
-            (sym-list (intern "LIST"))
+            ;(sym-list (intern "LIST"))
             (sym-cover (intern "COVER"))
             (sym-main-content (intern "MAIN-CONTENT"))
             (sym-summary (intern "SUMMARY"))
@@ -120,7 +120,7 @@
             ; create summary
             (if (and with-summary (not (assoc sym-summary local-props)))
               (let* ((main-content-info (assoc sym-main-content local-props))
-                     (check-info-key (assert (eq (cadr main-content-info) :file)))
+                     ;(check-info-key (assert (eq (cadr main-content-info) :file)))
                      (main-content-file (caddr main-content-info))
                      (main-content-lst (load-template-file (make-semi-abs-pathname main-content-file)))
                      (summary-text (if main-content-lst (get-summary main-content-lst))))
@@ -169,6 +169,7 @@
   (let* ((*html-local-dir*
            (multiple-value-bind (match regs)
              (cl-ppcre:scan-to-strings "(.*)/[^/]*$" file-name)
+             (declare (ignorable match))
              (elt regs 0)))
          (package-name (intern (string-upcase (concatenate 'string "CL-CLASP/" *html-local-dir*) ) :keyword))
          (path-name (merge-pathnames (concatenate 'string *html-data-dir* file-name)))
@@ -221,6 +222,7 @@
                     (*html-local-dir* 
                       (multiple-value-bind (match regs)
                         (cl-ppcre:scan-to-strings "(.*)/[^/]*$" file-name)
+                        (declare (ignorable match))
                         (elt regs 0))))
                (cond ((eq op-word :file) 
                       (setf key key-word 
@@ -412,7 +414,7 @@
          files)
          ;(print `(:make-d ,(symbolp (caar first-prop-item)) ,first-prop-item ,created-html-dir ,contents-data-dir))
 
-    ;(assert created-html-dir)
+    (assert created-html-dir)
     (labels ((find-string (str-list &optional result)
                (if (null str-list) result
                  (let ((first-obj (car str-list))
