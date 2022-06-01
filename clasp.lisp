@@ -172,7 +172,7 @@
              (elt regs 0)))
          (package-name (intern (string-upcase (concatenate 'string "CL-CLASP/" *html-local-dir*) ) :keyword))
          (path-name (merge-pathnames (concatenate 'string *html-data-dir* file-name)))
-         (my-package (unless (unless (find-package package-name) (find-package nickname)) (make-package package-name :nicknames (list nickname)))))
+         (my-package (or (or (find-package package-name) (find-package nickname)) (make-package package-name :nicknames (list nickname)))))
     (let ((*package* my-package))
       (use-package :cl)
       (use-package :cl-clasp)
