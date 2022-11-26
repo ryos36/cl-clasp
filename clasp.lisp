@@ -533,11 +533,9 @@
       (let* ((cdr-who-lst (cdr who-lst))
              (now-id (car cdr-who-lst))
              (remain (last-id cdr-who-lst)))
-        ;(print `(:remain ,remain))
-        (print `(:cdrx-who-lst ,(cdr who-lst)))
         (if remain
           (my-concatenate remain)
           (if (stringp now-id)
             (eval `(concatenate 'string ,@cdr-who-lst))
-            "")))))
+            ""))))
   ""))
